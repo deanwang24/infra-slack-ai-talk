@@ -1718,7 +1718,42 @@ function buildU(){
   });
 }
 buildU();
-let uT; addEventListener('resize', () => { clearTimeout(uT); uT = setTimeout(buildU, 200); });
+
+// 內容自動填滿櫃體(仿 PPT autofit):量測內容自然高度,放大到佔滿約 92%
+function autofit(){
+  document.querySelectorAll('.page .units').forEach(u => {
+    u.style.zoom = '';
+    const kids = [...u.children];
+    if (!kids.length) return;
+    const avail = u.getBoundingClientRect().height;
+    if (!avail) return;
+    const measure = () => {
+      const rs = kids.map(k => k.getBoundingClientRect());
+      return {
+        h: Math.max(...rs.map(r => r.bottom)) - Math.min(...rs.map(r => r.top)),
+        w: Math.max(...rs.map(r => r.right)) - Math.min(...rs.map(r => r.left))
+      };
+    };
+    const nat = measure();
+    if (nat.h <= 0) return;
+    let z = (avail * 0.94) / nat.h;
+    if (z >= 1) z = Math.min(2.5, z);
+    else if (nat.h <= avail) z = 1;
+    else z = Math.max(.75, (avail * .98) / nat.h);
+    if (z === 1) return;
+    u.style.zoom = z;
+    for (let i = 0; i < 4; i++) {
+      const rect = u.getBoundingClientRect();
+      const m = measure();
+      if (m.h <= rect.height * .99 && m.w <= rect.width * 1.005) break;
+      z *= 0.93; u.style.zoom = z;
+    }
+  });
+}
+autofit();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(autofit);
+
+let uT; addEventListener('resize', () => { clearTimeout(uT); uT = setTimeout(() => { buildU(); autofit(); }, 200); });
 
 // 鍵盤翻頁
 function go(i){
