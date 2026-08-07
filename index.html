@@ -14,9 +14,9 @@
   --unit-hi:#1a2536;
   --line:#243149;
   --line-soft:#1a2436;
-  --text:#d6e1ee;
-  --muted:#8395ad;
-  --dim:#5a6a83;
+  --text:#dce6f2;
+  --muted:#9aabc4;
+  --dim:#6e809c;
   --green:#3ddc97;
   --cyan:#4cc2f5;
   --amber:#f5c04a;
@@ -118,7 +118,7 @@ nav.idle{opacity:0;pointer-events:none}
   background:rgba(76,194,245,.06);flex:none;
 }
 .rack-title{min-width:0}
-.rack-title .eyebrow{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;color:var(--dim);display:block}
+.rack-title .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;color:var(--dim);display:block}
 .rack-title h2{font-size:1.4rem;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rack-tele{margin-left:auto;font-family:var(--mono);font-size:.62rem;color:var(--dim);display:flex;align-items:center;gap:.7rem;flex:none}
 .fan{width:.95rem;height:.95rem;border-radius:50%;border:1.5px solid var(--dim);position:relative;display:inline-block;flex:none}
@@ -223,7 +223,7 @@ nav.idle{opacity:0;pointer-events:none}
 .screen-bar .name{color:var(--text);font-weight:600}
 .screen-bar .time{margin-left:auto;color:var(--dim);white-space:nowrap}
 .screen pre{
-  padding:.7rem .85rem;font-family:var(--mono);font-size:.74rem;line-height:1.62;
+  padding:.7rem .85rem;font-family:var(--mono);font-size:.78rem;line-height:1.62;
   color:#c8d6e6;overflow:auto;white-space:pre;position:relative;z-index:1;
   text-shadow:0 0 .45rem rgba(120,180,255,.14);
   max-height:100%;
@@ -280,7 +280,10 @@ nav.idle{opacity:0;pointer-events:none}
 .chain{display:flex;align-items:stretch;flex-wrap:wrap}
 .chain .stp{background:#0d141f;border:1px solid var(--line);border-radius:.35rem;padding:.5rem .8rem;font-size:.82rem;font-weight:600;flex:1;min-width:5.5rem;text-align:center}
 .chain .stp small{display:block;color:var(--muted);font-weight:400;font-size:.68rem;line-height:1.5}
-.chain .arr{display:flex;align-items:center;padding:0 .4rem;color:var(--cyan);font-family:var(--mono);font-size:.85rem}
+.chain .arr{display:flex;align-items:center;padding:0 .35rem;min-width:2.1rem}
+.chain .arr::before{content:"";flex:1;height:2px;background:repeating-linear-gradient(90deg,rgba(76,194,245,.9) 0 .45rem,transparent .45rem .9rem);animation:flow 1s linear infinite}
+.chain .arr::after{content:"";width:0;height:0;border-left:.44rem solid var(--cyan);border-top:.3rem solid transparent;border-bottom:.3rem solid transparent;filter:drop-shadow(0 0 .25rem rgba(76,194,245,.55))}
+@keyframes flow{to{background-position:.9rem 0}}
 
 /* ── table ── */
 .tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:.4rem}
@@ -324,7 +327,7 @@ tr:last-child td{border-bottom:none}
 .workorder th{color:#6b5c3e;background:none;border-bottom:1px solid #c9bd9f;font-size:.6rem}
 .workorder td{border-bottom:1px dashed #c9bd9f;color:#241c10;padding:.42rem .6rem}
 .workorder td.time{white-space:nowrap;font-weight:700}
-.wo-note{font-size:.66rem;color:#6b5c3e;margin-top:.55rem}
+.wo-note{font-size:.74rem;color:#6b5c3e;margin-top:.55rem}
 .route{border:1.5px dashed #241c10;border-radius:.2rem;padding:.5rem .8rem;margin-top:.55rem}
 .route h5{font-size:.76rem;letter-spacing:.04em}
 .route p{font-size:.7rem;margin-top:.1rem;color:#463a22}
@@ -366,6 +369,108 @@ tr:last-child td{border-bottom:none}
 }
 .mini-rack:hover::after{opacity:1}
 
+/* ════════ 機房環境:鄰櫃 + 天花板燈條 ════════ */
+.env{position:absolute;inset:0;pointer-events:none;z-index:0}
+.env .nb{
+  position:absolute;top:5%;bottom:-2%;width:2.7rem;border-radius:.4rem;opacity:.8;
+  background:
+    repeating-linear-gradient(180deg,transparent 0 1rem,rgba(0,0,0,.55) 1rem 1.14rem),
+    linear-gradient(90deg,#0a101a,#0d1420);
+  border:1px solid #162032;
+}
+.env .nb.l{left:-1.4rem;transform:perspective(60rem) rotateY(40deg);transform-origin:left center}
+.env .nb.r{right:-1.4rem;transform:perspective(60rem) rotateY(-40deg);transform-origin:right center}
+.env .lamp{
+  position:absolute;top:.35rem;left:14%;right:14%;height:.32rem;border-radius:99px;
+  background:linear-gradient(90deg,transparent,rgba(215,232,255,.55) 20%,rgba(215,232,255,.55) 80%,transparent);
+  box-shadow:0 .3rem 3.2rem .9rem rgba(170,205,255,.13);opacity:.85;
+}
+
+/* ════════ 右滑軌跳線 ════════ */
+.rack-body .rail.r{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 220'%3E%3Cpath d='M6 0 C 10 60, 2 160, 6 220' fill='none' stroke='%233c78d8' stroke-width='2.4' opacity='.85'/%3E%3Cpath d='M12 0 C 8 70, 16 150, 12 220' fill='none' stroke='%23e08a3c' stroke-width='2.4' opacity='.85'/%3E%3Cpath d='M18 0 C 22 50, 14 170, 18 220' fill='none' stroke='%233ddc97' stroke-width='2.2' opacity='.7'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,rgba(255,255,255,.03),transparent 1.8rem),
+    radial-gradient(circle .15rem at 50% .55rem, #040709 97%, transparent);
+  background-size:100% 12rem,auto,100% 1.2rem;
+  background-repeat:repeat-y,no-repeat,repeat;
+}
+
+/* ════════ 左滑軌 U 位刻度 ════════ */
+.rail{display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:.55rem 0}
+.u-lab{font-family:var(--mono);font-size:.48rem;color:#3b4d70;line-height:1;user-select:none}
+
+/* ════════ LED 活動閃爍 ════════ */
+.page.on .unit-side .led.g{animation:act 3.6s steps(1) infinite}
+.page.on .unit-side .led.g:first-child{animation-duration:2.8s;animation-delay:.9s}
+.page.on .unit-side .led.c{animation:act 4.4s steps(1) infinite;animation-delay:1.6s}
+@keyframes act{0%,84%{opacity:1}86%{opacity:.25}88%{opacity:1}92%{opacity:.3}94%,100%{opacity:1}}
+
+/* ════════ console 對接跳線 ════════ */
+.unit-row.link{position:relative}
+.patch{
+  position:absolute;left:50%;top:26%;transform:translateX(-50%);width:6.2rem;height:3rem;z-index:6;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 48'%3E%3Cpath d='M8 7 C 32 42, 88 42, 112 7' fill='none' stroke='%23e08a3c' stroke-width='3.6' stroke-linecap='round'/%3E%3Crect x='2' y='2' width='12' height='9' rx='1.5' fill='%23cdd7e4'/%3E%3Crect x='106' y='2' width='12' height='9' rx='1.5' fill='%23cdd7e4'/%3E%3C/svg%3E") center/contain no-repeat;
+  filter:drop-shadow(0 .25rem .35rem rgba(0,0,0,.55));
+}
+
+/* ════════ 決策樹連接線 ════════ */
+.dt-root{margin:0 auto;text-align:center;font-size:1.06rem;font-weight:700;background:#0d141f;border:1px solid var(--line);border-radius:.45rem;padding:.55rem 1.6rem;width:max-content;max-width:100%}
+.dt-links{position:relative;width:75%;margin:0 auto;height:2.1rem}
+.dt-links::before{content:"";position:absolute;left:50%;top:0;height:50%;width:2px;background:#33456a;transform:translateX(-50%)}
+.dt-links::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:#33456a}
+.dt-links i{position:absolute;top:50%;bottom:0;width:2px;background:#33456a;transform:translateX(-50%)}
+.dt-links i:nth-of-type(1){left:0}
+.dt-links i:nth-of-type(2){left:33.333%}
+.dt-links i:nth-of-type(3){left:66.667%}
+.dt-links i:nth-of-type(4){left:100%}
+.dt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem}
+.dt-col{border:1px solid var(--line);border-radius:.45rem;padding:.8rem 1rem;background:#0d141f}
+.dt-col .cond{font-size:.85rem;color:var(--muted)}
+.dt-col .who{font-size:1.18rem;font-weight:700;margin:.1rem 0}
+.dt-col .how{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+.dt-col.c1 .who{color:var(--green)}
+.dt-col.c2 .who{color:var(--cyan)}
+.dt-col.c3 .who{color:var(--amber)}
+.dt-col.c4 .who{color:var(--red)}
+
+/* ════════ 貼紙 / 銘牌限寬 ════════ */
+.sticker{align-self:center;width:max-content;max-width:96%}
+.plate{align-self:flex-start;width:max-content;max-width:100%}
+
+/* ════════ .lg:內容少的頁整體放大 ════════ */
+.lg .units{gap:.95rem}
+.lg .unit-content{padding:1.05rem 1.35rem}
+.lg .unit-content h4{font-size:1.18rem}
+.lg .unit-content p{font-size:1.02rem;line-height:1.7}
+.lg .unit-label{font-size:.7rem;margin-bottom:.5rem}
+.lg .unit.slim .unit-content{padding:.72rem 1.2rem}
+.lg .unit.slim .body{font-size:1.02rem}
+.lg .unit.slim .basis{font-size:.8rem}
+.lg .unit.slim .no{font-size:.95rem}
+.lg .guard-list li{font-size:1rem;padding:.5rem 0 .5rem 1.7rem}
+.lg .chain .stp{font-size:.98rem;padding:.7rem 1rem}
+.lg .chain .stp small{font-size:.8rem}
+.lg table{font-size:.98rem}
+.lg th{font-size:.74rem;padding:.65rem 1.1rem}
+.lg td{padding:.65rem 1.1rem}
+.lg .sticker{font-size:1.04rem;padding:.7rem 1.2rem}
+.lg .sticker small{font-size:.82rem}
+.lg .plate{font-size:.78rem}
+.lg .readout .lab{font-size:.88rem}
+.lg .readout .val{font-size:2.5rem}
+.lg .readout .val.txt{font-size:1.15rem;padding:.7rem 0}
+.lg .quote .q{font-size:1.1rem}
+.lg .quote .land{font-size:.92rem}
+.lg .screen pre{font-size:.88rem;line-height:1.7}
+.lg .screen-bar{font-size:.78rem}
+
+/* ════════ 動畫弱化偏好 ════════ */
+@media (prefers-reduced-motion:reduce){
+  .chain .arr::before,.page.on .fan::before,.led,.unit-side .led{animation:none!important}
+  .unit,.console,.plate,.sticker,.workorder,.rack{transition:none}
+}
+
 /* ════════ 直式手機 fallback ════════ */
 @media (orientation:portrait) and (max-width:840px){
   html{font-size:13px}
@@ -383,6 +488,9 @@ tr:last-child td{border-bottom:none}
   .cover .title .sub{font-size:1.3rem}
   .units{overflow:visible;justify-content:flex-start}
   .screen pre{font-size:.7rem}
+  .env,.patch,.u-lab,.dt-links{display:none}
+  .dt-grid{grid-template-columns:1fr}
+  .sticker,.plate{width:auto;align-self:stretch}
 }
 </style>
 </head>
@@ -428,6 +536,7 @@ tr:last-child td{border-bottom:none}
 <!-- ═══ P02 Agenda(機房平面圖) ═══ -->
 <section class="page rk" id="p02" data-rid="NOC">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -488,8 +597,9 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <!-- ═══ P03 R01 痛點 ═══ -->
-<section class="page rk" id="p03" data-rid="R01" data-nav="r01">
+<section class="page rk lg" id="p03" data-rid="R01" data-nav="r01">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -528,8 +638,9 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <!-- ═══ P04 R02 架構 ═══ -->
-<section class="page rk" id="p04" data-rid="R02" data-nav="r02">
+<section class="page rk lg" id="p04" data-rid="R02" data-nav="r02">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -546,9 +657,9 @@ tr:last-child td{border-bottom:none}
                 <div class="unit-label">TOPOLOGY</div>
                 <div class="chain">
                   <div class="stp">Slack<small>同仁提問 / 告警進入</small></div>
-                  <div class="arr">→</div>
+                  <div class="arr"></div>
                   <div class="stp" style="border-color:rgba(76,194,245,.45)">AI Agent<small style="color:var(--cyan)">+ 20 多個領域 skill<br>路由 · 查證 · 判斷 · 收斂</small></div>
-                  <div class="arr">→</div>
+                  <div class="arr"></div>
                   <div class="stp">資料源<small>日誌搜尋 · 監控指標 · 主機監控<br>網管 Portal · 資產清單 · 文件/工單</small></div>
                 </div>
               </div>
@@ -565,8 +676,9 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <!-- ═══ P05 R03 思維一 · 問法 ═══ -->
-<section class="page rk" id="p05" data-rid="R03" data-nav="r03">
+<section class="page rk lg" id="p05" data-rid="R03" data-nav="r03">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -609,8 +721,9 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <!-- ═══ P06 R03 · flow ═══ -->
-<section class="page rk" id="p06" data-rid="R03" data-nav="r03">
+<section class="page rk lg" id="p06" data-rid="R03" data-nav="r03">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -626,10 +739,10 @@ tr:last-child td{border-bottom:none}
               <div class="unit-content">
                 <div class="unit-label">TROUBLESHOOTING FLOW</div>
                 <div class="chain">
-                  <div class="stp">告警裡的 IP</div><div class="arr">→</div>
-                  <div class="stp">定位主機</div><div class="arr">→</div>
-                  <div class="stp">看資源狀態</div><div class="arr">→</div>
-                  <div class="stp">撈服務日誌</div><div class="arr">→</div>
+                  <div class="stp">告警裡的 IP</div><div class="arr"></div>
+                  <div class="stp">定位主機</div><div class="arr"></div>
+                  <div class="stp">看資源狀態</div><div class="arr"></div>
+                  <div class="stp">撈服務日誌</div><div class="arr"></div>
                   <div class="stp">找 owner 通知</div>
                 </div>
               </div>
@@ -651,8 +764,9 @@ tr:last-child td{border-bottom:none}
 </section>
 
 <!-- ═══ P07 R03 · 單一來源 ═══ -->
-<section class="page rk" id="p07" data-rid="R03" data-nav="r03">
+<section class="page rk lg" id="p07" data-rid="R03" data-nav="r03">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -691,6 +805,7 @@ tr:last-child td{border-bottom:none}
 <!-- ═══ P08 R03 · CASE01 1/2 ═══ -->
 <section class="page rk" id="p08" data-rid="R03" data-nav="r03">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -701,7 +816,7 @@ tr:last-child td{border-bottom:none}
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit-row u2">
+            <div class="unit-row u2 link"><div class="patch" aria-hidden="true"></div>
               <div class="console" style="--i:0">
                 <div class="screen">
                   <div class="screen-bar"><span class="avatar av-bot">J</span><span class="name">Jarvis</span><span class="time">① 初始訊息 · 18:16:29</span></div>
@@ -755,6 +870,7 @@ fail_time=06-18 18:13:29</pre>
 <!-- ═══ P09 R03 · CASE01 2/2 ═══ -->
 <section class="page rk" id="p09" data-rid="R03" data-nav="r03">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -802,8 +918,9 @@ fail_time=06-18 18:13:29</pre>
 </section>
 
 <!-- ═══ P10 R03 · skill 追查 ═══ -->
-<section class="page rk" id="p10" data-rid="R03" data-nav="r03">
+<section class="page rk lg" id="p10" data-rid="R03" data-nav="r03">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -832,8 +949,9 @@ fail_time=06-18 18:13:29</pre>
 </section>
 
 <!-- ═══ P11 R04 · 決策樹 ═══ -->
-<section class="page rk" id="p11" data-rid="R04" data-nav="r04">
+<section class="page rk lg" id="p11" data-rid="R04" data-nav="r04">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -847,27 +965,29 @@ fail_time=06-18 18:13:29</pre>
             <div class="unit" style="--i:0">
               <div class="unit-side"><i class="led c"></i><i class="led g"></i><div class="vent"></div></div>
               <div class="unit-content">
-                <div class="unit-label" style="text-align:center">DECISION TREE · 這個任務,需要語意判斷嗎?</div>
-                <div class="unit-row u4">
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
-                    <div style="font-size:.72rem;color:var(--muted)">不需要判斷</div>
-                    <div style="font-size:.98rem;font-weight:700;color:var(--green)">bot / 腳本</div>
-                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">毫秒級 · 0 token</div>
+                <div class="unit-label" style="text-align:center">DECISION TREE</div>
+                <div class="dt-root">這個任務,需要語意判斷嗎?</div>
+                <div class="dt-links"><i></i><i></i><i></i><i></i></div>
+                <div class="dt-grid">
+                  <div class="dt-col c1">
+                    <div class="cond">不需要判斷</div>
+                    <div class="who">bot / 腳本</div>
+                    <div class="how">毫秒級 · 0 token</div>
                   </div>
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
-                    <div style="font-size:.72rem;color:var(--muted)">需要判斷 · 唯讀</div>
-                    <div style="font-size:.98rem;font-weight:700;color:var(--cyan)">AI + skill</div>
-                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">分鐘級 · 跨來源綜合</div>
+                  <div class="dt-col c2">
+                    <div class="cond">需要判斷 · 唯讀</div>
+                    <div class="who">AI + skill</div>
+                    <div class="how">分鐘級 · 跨來源綜合</div>
                   </div>
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
-                    <div style="font-size:.72rem;color:var(--muted)">要寫入 · 可規則化</div>
-                    <div style="font-size:.98rem;font-weight:700;color:var(--amber)">controller / 流程</div>
-                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">受控白名單+確認</div>
+                  <div class="dt-col c3">
+                    <div class="cond">要寫入 · 可規則化</div>
+                    <div class="who">controller / 流程</div>
+                    <div class="how">受控白名單+確認</div>
                   </div>
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
-                    <div style="font-size:.72rem;color:var(--muted)">要寫入 · 高風險</div>
-                    <div style="font-size:.98rem;font-weight:700;color:var(--red)">人核准</div>
-                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">目標與業務取捨</div>
+                  <div class="dt-col c4">
+                    <div class="cond">要寫入 · 高風險</div>
+                    <div class="who">人核准</div>
+                    <div class="how">目標與業務取捨</div>
                   </div>
                 </div>
               </div>
@@ -884,8 +1004,9 @@ fail_time=06-18 18:13:29</pre>
 </section>
 
 <!-- ═══ P12 R04 · triage + 統計 ═══ -->
-<section class="page rk" id="p12" data-rid="R04" data-nav="r04">
+<section class="page rk lg" id="p12" data-rid="R04" data-nav="r04">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -901,8 +1022,8 @@ fail_time=06-18 18:13:29</pre>
               <div class="unit-content">
                 <div class="readout-row">
                   <div class="readout"><div class="lab">上線後兩個月(6–7 月)</div><div class="val txt">實測工作量</div></div>
-                  <div class="readout"><div class="lab">告警判斷轉發</div><div class="val">116<small> 次</small></div></div>
-                  <div class="readout"><div class="lab">真人問答</div><div class="val">177<small> 次</small></div></div>
+                  <div class="readout"><div class="lab">告警判斷轉發</div><div class="val" data-count="116">116<small> 次</small></div></div>
+                  <div class="readout"><div class="lab">真人問答</div><div class="val" data-count="177">177<small> 次</small></div></div>
                 </div>
               </div>
               <div class="unit-hd"><i></i><i></i></div>
@@ -912,10 +1033,10 @@ fail_time=06-18 18:13:29</pre>
               <div class="unit-content">
                 <div class="unit-label">TRIAGE PIPELINE</div>
                 <div class="chain">
-                  <div class="stp">監控告警</div><div class="arr">→</div>
-                  <div class="stp">bot 搬運</div><div class="arr">→</div>
-                  <div class="stp" style="border-color:rgba(76,194,245,.45)">AI 查證</div><div class="arr">→</div>
-                  <div class="stp">初判 + 摘要</div><div class="arr">→</div>
+                  <div class="stp">監控告警</div><div class="arr"></div>
+                  <div class="stp">bot 搬運</div><div class="arr"></div>
+                  <div class="stp" style="border-color:rgba(76,194,245,.45)">AI 查證</div><div class="arr"></div>
+                  <div class="stp">初判 + 摘要</div><div class="arr"></div>
                   <div class="stp">通知人</div>
                 </div>
               </div>
@@ -937,6 +1058,7 @@ fail_time=06-18 18:13:29</pre>
 <!-- ═══ P13 R04 · DDoS 1/3 ═══ -->
 <section class="page rk" id="p13" data-rid="R04" data-nav="r04">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -947,7 +1069,7 @@ fail_time=06-18 18:13:29</pre>
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit-row u2">
+            <div class="unit-row u2 link"><div class="patch" aria-hidden="true"></div>
               <div class="console" style="--i:0">
                 <div class="screen">
                   <div class="screen-bar"><span class="avatar av-human">值</span><span class="name">值班同仁</span><span class="time">① 提問原文 · 17:39 GMT+8</span></div>
@@ -999,6 +1121,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 <!-- ═══ P14 R04 · DDoS 2/3 ═══ -->
 <section class="page rk" id="p14" data-rid="R04" data-nav="r04">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1043,6 +1166,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 <!-- ═══ P15 R04 · DDoS 3/3 ═══ -->
 <section class="page rk" id="p15" data-rid="R04" data-nav="r04">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1083,8 +1207,9 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P16 R05 思維三 ═══ -->
-<section class="page rk" id="p16" data-rid="R05" data-nav="r05">
+<section class="page rk lg" id="p16" data-rid="R05" data-nav="r05">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1133,8 +1258,9 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P17 R06 · 四失敗 ═══ -->
-<section class="page rk" id="p17" data-rid="R06" data-nav="r06">
+<section class="page rk lg" id="p17" data-rid="R06" data-nav="r06">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1162,8 +1288,9 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P18 R06 · 數數題 ═══ -->
-<section class="page rk" id="p18" data-rid="R06" data-nav="r06">
+<section class="page rk lg" id="p18" data-rid="R06" data-nav="r06">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1207,6 +1334,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 <!-- ═══ P19 R06 · CASE03 ═══ -->
 <section class="page rk" id="p19" data-rid="R06" data-nav="r06">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1217,7 +1345,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit-row u2">
+            <div class="unit-row u2 link"><div class="patch" aria-hidden="true"></div>
               <div class="console" style="--i:0">
                 <div class="screen">
                   <div class="screen-bar"><span class="avatar av-human">同</span><span class="name">同仁</span><span class="time">實際提問 · 06-08 14:01 GMT+8</span></div>
@@ -1261,8 +1389,9 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P20 R07 守門 ═══ -->
-<section class="page rk" id="p20" data-rid="R07" data-nav="r07">
+<section class="page rk lg" id="p20" data-rid="R07" data-nav="r07">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1322,8 +1451,9 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P21 R08 閉環 ═══ -->
-<section class="page rk" id="p21" data-rid="R08" data-nav="r08">
+<section class="page rk lg" id="p21" data-rid="R08" data-nav="r08">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1339,8 +1469,8 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
               <div class="unit-content">
                 <div class="unit-label">REVIEW LOOP</div>
                 <div class="chain">
-                  <div class="stp">模型 A 提案</div><div class="arr">→</div>
-                  <div class="stp">模型 B 批判</div><div class="arr">→</div>
+                  <div class="stp">模型 A 提案</div><div class="arr"></div>
+                  <div class="stp">模型 B 批判</div><div class="arr"></div>
                   <div class="stp" style="border-color:rgba(76,194,245,.45)">人:仲裁 + 查證</div>
                 </div>
               </div>
@@ -1361,8 +1491,9 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P22 R08 · 業界五想法 ═══ -->
-<section class="page rk" id="p22" data-rid="R08" data-nav="r08">
+<section class="page rk lg" id="p22" data-rid="R08" data-nav="r08">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1376,11 +1507,11 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
             <div class="unit" style="--i:0">
               <div class="unit-side"><i class="led c"></i><i class="led c"></i><div class="vent"></div></div>
               <div class="unit-content">
-                <div class="quote"><div class="q">「不在 context 裡的知識,對 agent 等於不存在」</div><div class="land">落地:SOP、黑話、判斷寫進 skill —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Anthropic Agent Skills · OpenAI Harness Engineering</span></div></div>
-                <div class="quote"><div class="q">「context 是有限資源,工具定義會吃光它」</div><div class="land">落地:工具 65→15 收斂、高頻查詢改腳本 —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Anthropic Code Execution with MCP</span></div></div>
-                <div class="quote"><div class="q">「規則要放在對的高度(right altitude)」</div><div class="land">落地:前沿留思考空間、實測失敗面才上硬規則 —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Anthropic Context Engineering</span></div></div>
-                <div class="quote"><div class="q">「寫的和審的要分開」</div><div class="land">落地:雙模型互審+人仲裁、上線前 dry-run —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Claude Code Best Practices · OpenAI CriticGPT</span></div></div>
-                <div class="quote"><div class="q">「inference 花在建 loop,不花在跑 loop」</div><div class="land">落地:agent 建工具,排程與人直接跑 —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Kelsey Hightower ZTA</span></div></div>
+                <div class="quote"><div class="q">「不在 context 裡的知識,對 agent 等於不存在」</div><div class="land">落地:SOP、黑話、判斷寫進 skill —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Anthropic Agent Skills · OpenAI Harness Engineering</span></div></div>
+                <div class="quote"><div class="q">「context 是有限資源,工具定義會吃光它」</div><div class="land">落地:工具 65→15 收斂、高頻查詢改腳本 —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Anthropic Code Execution with MCP</span></div></div>
+                <div class="quote"><div class="q">「規則要放在對的高度(right altitude)」</div><div class="land">落地:前沿留思考空間、實測失敗面才上硬規則 —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Anthropic Context Engineering</span></div></div>
+                <div class="quote"><div class="q">「寫的和審的要分開」</div><div class="land">落地:雙模型互審+人仲裁、上線前 dry-run —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Claude Code Best Practices · OpenAI CriticGPT</span></div></div>
+                <div class="quote"><div class="q">「inference 花在建 loop,不花在跑 loop」</div><div class="land">落地:agent 建工具,排程與人直接跑 —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Kelsey Hightower ZTA</span></div></div>
               </div>
               <div class="unit-hd"><i></i><i></i></div>
             </div>
@@ -1396,6 +1527,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 <!-- ═══ P23 R09 時間帳 ═══ -->
 <section class="page rk" id="p23" data-rid="R09" data-nav="r09">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1439,6 +1571,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 <!-- ═══ P24 R10 參考 ═══ -->
 <section class="page rk" id="p24" data-rid="R10" data-nav="r10">
   <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
@@ -1545,11 +1678,47 @@ const watcher = new IntersectionObserver(es => {
 }, {threshold:.55});
 pages.forEach(p => watcher.observe(p));
 
+// 統計數字滾動(116/177)
+function countUp(el){
+  const target = +el.dataset.count;
+  const node = el.firstChild;
+  const t0 = performance.now(), dur = 900;
+  function step(t){
+    const p = Math.min(1, (t - t0) / dur);
+    node.textContent = String(Math.round(target * (p * (2 - p))));
+    if (p < 1) requestAnimationFrame(step); else node.textContent = String(target);
+  }
+  requestAnimationFrame(step);
+}
+
 // 機櫃上電(每次進入頁面重新上電 → 翻頁即轉場)
 const powerOn = new IntersectionObserver(es => {
-  es.forEach(e => e.target.classList.toggle('on', e.isIntersecting));
+  es.forEach(e => {
+    e.target.classList.toggle('on', e.isIntersecting);
+    if (e.isIntersecting && !qs.has('flat')) {
+      e.target.querySelectorAll('.readout .val[data-count]').forEach(countUp);
+    }
+  });
 }, {threshold:.35});
 pages.forEach(p => powerOn.observe(p));
+
+// 左滑軌 U 位刻度(依機櫃高度生成)
+function buildU(){
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  document.querySelectorAll('.rack-body .rail:not(.r)').forEach(rail => {
+    rail.textContent = '';
+    if (!rail.clientHeight) return;
+    const n = Math.max(4, Math.floor(rail.clientHeight / (2.8 * rem)));
+    for (let i = 0; i < n; i++) {
+      const sp = document.createElement('span');
+      sp.className = 'u-lab';
+      sp.textContent = String(Math.max(1, 42 - i * 2)).padStart(2, '0');
+      rail.appendChild(sp);
+    }
+  });
+}
+buildU();
+let uT; addEventListener('resize', () => { clearTimeout(uT); uT = setTimeout(buildU, 200); });
 
 // 鍵盤翻頁
 function go(i){
