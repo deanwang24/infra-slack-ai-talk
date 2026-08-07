@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infra Slack AI 助理:從查詢 Flow 到 Agent 設計 — Dean Wang</title>
+<meta name="description" content="把 infra 團隊的排障直覺,工程化成 Slack 裡的 AI 助理。機房巡檢式投影報告:十座機櫃、四個思維、三組真實案例。">
+<style>
+:root{
+  --bg:#05080d;
+  --steel:#131a26;
+  --steel-hi:#1a2434;
+  --unit:#141c2a;
+  --unit-hi:#1a2536;
+  --line:#243149;
+  --line-soft:#1a2436;
+  --text:#d6e1ee;
+  --muted:#8395ad;
+  --dim:#5a6a83;
+  --green:#3ddc97;
+  --cyan:#4cc2f5;
+  --amber:#f5c04a;
+  --red:#f0716f;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:"PingFang TC","Noto Sans TC",-apple-system,"Segoe UI",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+/* 1rem = 投影舞台高度的 1/63 → 內容隨畫面等比縮放 */
+html{font-size:calc(min(100vh, 56.25vw)/63);scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;
+  scroll-snap-type:y mandatory;overflow-x:hidden;
+}
+::selection{background:rgba(76,194,245,.28)}
+
+/* ════════ 頁面骨架:一頁 = 一張 16:9 投影片 ════════ */
+.page{height:100vh;height:100svh;scroll-snap-align:start;display:grid;place-items:center;overflow:hidden;position:relative}
+.stage{
+  width:min(100vw,177.78vh);height:min(100vh,56.25vw);
+  position:relative;display:flex;flex-direction:column;padding:1.9rem 2.3rem;
+}
+/* 機房地板(機櫃頁) */
+.rk .stage::before{
+  content:"";position:absolute;left:-12%;right:-12%;bottom:-3%;height:17%;z-index:0;
+  background:
+    repeating-linear-gradient(90deg,rgba(76,194,245,.09) 0 2px,transparent 2px 88px),
+    repeating-linear-gradient(0deg,rgba(76,194,245,.06) 0 1px,transparent 1px 30px);
+  transform:perspective(300px) rotateX(58deg);transform-origin:50% 0;
+  pointer-events:none;
+}
+
+/* ════════ 全域 UI ════════ */
+#progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--green));width:0%;z-index:60}
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(5,8,13,.82);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);transition:opacity .4s;
+}
+nav.idle{opacity:0;pointer-events:none}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 18px;display:flex;align-items:center;gap:14px;height:44px}
+.nav-logo{font-family:var(--mono);font-size:12px;color:var(--green);white-space:nowrap;text-decoration:none}
+.nav-logo .p{color:var(--dim)}
+.nav-links{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{font-family:var(--mono);font-size:11.5px;color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:5px;white-space:nowrap;transition:.15s}
+.nav-links a b{color:var(--dim);font-weight:400;margin-right:3px}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--cyan);background:rgba(76,194,245,.08)}
+.nav-links a.active b{color:var(--cyan)}
+.nav-hint{font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:nowrap}
+#pageno{
+  position:fixed;right:14px;bottom:12px;z-index:55;font-family:var(--mono);font-size:11.5px;color:var(--dim);
+  background:rgba(5,8,13,.7);border:1px solid var(--line-soft);border-radius:99px;padding:3px 12px;
+}
+#pageno b{color:var(--cyan);font-weight:400}
+
+/* ════════ LED ════════ */
+.led{display:inline-block;width:.42rem;height:.42rem;border-radius:50%;background:#2a3448;vertical-align:middle}
+.on .led.g{background:var(--green);box-shadow:0 0 .35rem var(--green)}
+.on .led.c{background:var(--cyan);box-shadow:0 0 .35rem var(--cyan)}
+.on .led.a{background:var(--amber);box-shadow:0 0 .35rem var(--amber);animation:blink 2.2s steps(1) infinite}
+.on .led.r{background:var(--red);box-shadow:0 0 .35rem var(--red);animation:blink 1.4s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* ════════ 封面 / 封底(大會版型) ════════ */
+.stage.cover{padding:0;overflow:hidden;background:url(assets/cover-bg.png) center/cover no-repeat #0a1430}
+.cover .abs{position:absolute}
+.cover .logo{left:5.5%;top:8%;width:18.5%}
+.cover .mobius{left:54.5%;top:17.8%;width:47.5%}
+.cover .mobius.back{left:65.5%;top:16.9%;width:38.5%}
+.cover .slogan{left:5.5%;top:89.8%;width:43%}
+.cover img{display:block;width:100%;height:auto}
+.cover .title{left:5.5%;top:36.4%;width:60%}
+.cover .title h1{font-size:3.3rem;font-weight:800;line-height:1.25;color:#fff;letter-spacing:.01em}
+.cover .title .sub{display:block;font-size:2rem;font-weight:600;color:#9fd9ff;margin-top:.4rem}
+.cover .tagline{left:5.5%;top:66.7%;width:56%}
+.cover .tagline p{font-size:1.06rem;color:rgba(255,255,255,.92)}
+.cover .tagline .by{font-size:.82rem;color:rgba(255,255,255,.55);margin-top:.5rem;font-family:var(--mono)}
+.cover .thank{left:5.5%;top:78.5%}
+.cover .thank h1{font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:.14em}
+.cover .thank p{font-size:.95rem;color:rgba(255,255,255,.65);margin-top:.3rem;font-family:var(--mono)}
+
+/* ════════ 機櫃 ════════ */
+.rack{position:relative;z-index:1;flex:1;min-height:0;display:flex;flex-direction:column;filter:brightness(.5) saturate(.6);transition:filter .7s ease}
+.page.on .rack{filter:brightness(1) saturate(1)}
+.rack-frame{
+  flex:1;min-height:0;display:flex;flex-direction:column;
+  border:1px solid var(--line);border-radius:.7rem;overflow:hidden;
+  background:linear-gradient(180deg,var(--steel-hi),var(--steel) 3.6rem);
+  box-shadow:0 1.8rem 4.5rem -2.4rem rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.rack-head{
+  flex:none;display:flex;align-items:center;gap:1rem;padding:.72rem 1.4rem;
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1c2739,#151d2b);
+}
+.rack-id{
+  font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--cyan);
+  border:1px solid rgba(76,194,245,.4);border-radius:.28rem;padding:.14rem .6rem;letter-spacing:.1em;
+  background:rgba(76,194,245,.06);flex:none;
+}
+.rack-title{min-width:0}
+.rack-title .eyebrow{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;color:var(--dim);display:block}
+.rack-title h2{font-size:1.4rem;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rack-tele{margin-left:auto;font-family:var(--mono);font-size:.62rem;color:var(--dim);display:flex;align-items:center;gap:.7rem;flex:none}
+.fan{width:.95rem;height:.95rem;border-radius:50%;border:1.5px solid var(--dim);position:relative;display:inline-block;flex:none}
+.fan::before{
+  content:"";position:absolute;inset:.09rem;border-radius:50%;
+  background:conic-gradient(var(--dim) 0 40deg,transparent 40deg 90deg,var(--dim) 90deg 130deg,transparent 130deg 180deg,var(--dim) 180deg 220deg,transparent 220deg 270deg,var(--dim) 270deg 310deg,transparent 310deg 360deg);
+}
+.page.on .fan::before{animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.rack-body{flex:1;min-height:0;display:flex;background:linear-gradient(180deg,#0c121d,#0a0f18)}
+.rail{
+  flex:none;width:1.3rem;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.03),transparent 1.8rem),
+    radial-gradient(circle .15rem at 50% .55rem, #040709 97%, transparent);
+  background-size:auto,100% 1.2rem;
+  border-left:1px solid rgba(255,255,255,.03);border-right:1px solid rgba(0,0,0,.5);
+}
+.rail.r{border-left:1px solid rgba(0,0,0,.5);border-right:1px solid rgba(255,255,255,.03)}
+.units{flex:1;min-width:0;min-height:0;padding:.95rem .95rem;display:flex;flex-direction:column;gap:.65rem;justify-content:center;overflow-y:auto;scrollbar-width:thin}
+.rack-foot{
+  flex:none;display:flex;align-items:center;gap:.5rem;padding:.42rem 1.4rem;
+  border-top:1px solid var(--line);background:#111825;
+  font-family:var(--mono);font-size:.58rem;color:var(--dim);letter-spacing:.14em;
+}
+.rack-foot .socket{width:.8rem;height:.45rem;border:1px solid #2a3448;border-radius:.12rem;background:#080d15}
+
+/* ── unit ── */
+.unit{
+  display:flex;background:linear-gradient(180deg,var(--unit-hi),var(--unit));
+  border:1px solid var(--line);border-radius:.4rem;overflow:hidden;
+  opacity:0;transform:translateY(.9rem);
+  transition:opacity .45s ease,transform .45s ease;
+  transition-delay:calc(var(--i,0)*90ms);
+}
+.page.on .unit{opacity:1;transform:none}
+.unit-side{
+  flex:none;width:1.9rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;
+  padding:.65rem 0;border-right:1px solid rgba(0,0,0,.35);background:rgba(0,0,0,.14);
+}
+.unit-side .vent{width:.8rem;flex:1;min-height:.8rem;opacity:.5;background:repeating-linear-gradient(0deg,#0a0f18 0 2px,transparent 2px 5px)}
+.unit-hd{
+  flex:none;width:1.1rem;border-left:1px solid rgba(0,0,0,.35);background:rgba(0,0,0,.14);
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:.55rem 0;
+}
+.unit-hd i{width:.4rem;height:.4rem;border-radius:50%;background:#0a0f18;border:1px solid #2c3950;position:relative}
+.unit-hd i::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#2c3950;transform:rotate(45deg)}
+.unit-content{flex:1;min-width:0;padding:.8rem 1.1rem}
+.unit-content h4{font-size:.98rem;font-weight:600;margin-bottom:.15rem}
+.unit-content p{font-size:.85rem;color:var(--muted);line-height:1.62}
+.unit-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:var(--dim);margin-bottom:.45rem}
+
+.unit.slim .unit-content{padding:.55rem 1rem}
+.unit.slim .body{font-size:.85rem;line-height:1.55}
+.unit.slim .basis{display:block;font-family:var(--mono);font-size:.68rem;color:var(--dim);margin-top:.1rem}
+.unit.slim .basis::before{content:"依據 → ";color:var(--green)}
+.unit.slim .no{font-family:var(--mono);color:var(--cyan);margin-right:.55rem;font-size:.82rem}
+
+.unit-row{display:grid;gap:.65rem}
+.u2{grid-template-columns:1fr 1fr}
+.u3{grid-template-columns:repeat(3,1fr)}
+.u4{grid-template-columns:repeat(4,1fr)}
+.unit-row > .unit{height:100%}
+
+/* ── console:1U 抽拉式 LCD console ── */
+.console{
+  border-radius:.55rem;overflow:hidden;position:relative;
+  background:linear-gradient(180deg,#28324a,#1a2233 18%,#151c2b 70%,#10151f);
+  border:1px solid #303c58;border-bottom-color:#0a0e16;
+  box-shadow:0 .9rem 2.2rem -1rem rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.07);
+  padding:.5rem .55rem 0;
+  opacity:0;transform:translateY(.9rem);transition:opacity .45s,transform .45s;transition-delay:calc(var(--i,0)*90ms);
+  display:flex;flex-direction:column;
+}
+.page.on .console{opacity:1;transform:none}
+.screen{
+  position:relative;flex:1;min-height:0;border-radius:.3rem;overflow:hidden;
+  border:2px solid #04060b;
+  background:radial-gradient(130% 150% at 50% -10%, #0d1624 0%, #070d16 55%, #05090f 100%);
+  box-shadow:inset 0 0 2.2rem rgba(0,0,0,.75), inset 0 0 .4rem rgba(0,0,0,.9);
+}
+.screen::before{ /* 玻璃反光 */
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:linear-gradient(115deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.015) 24%,transparent 34%);
+}
+.screen::after{ /* 掃描線 + 邊角暗角 */
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 3px),
+    radial-gradient(120% 120% at 50% 50%, transparent 62%, rgba(0,0,0,.42) 100%);
+}
+.screen-bar{
+  display:flex;align-items:center;gap:.5rem;padding:.32rem .7rem;
+  background:rgba(16,26,42,.9);border-bottom:1px solid #16202f;
+  font-family:var(--mono);font-size:.68rem;color:var(--muted);position:relative;z-index:1;
+}
+.screen-bar .avatar{
+  width:1.05rem;height:1.05rem;border-radius:.22rem;display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.58rem;font-weight:700;color:#08111c;flex:none;
+}
+.av-bot{background:var(--amber)}.av-ai{background:var(--green)}.av-human{background:var(--cyan)}
+.screen-bar .name{color:var(--text);font-weight:600}
+.screen-bar .time{margin-left:auto;color:var(--dim);white-space:nowrap}
+.screen pre{
+  padding:.7rem .85rem;font-family:var(--mono);font-size:.74rem;line-height:1.62;
+  color:#c8d6e6;overflow:auto;white-space:pre;position:relative;z-index:1;
+  text-shadow:0 0 .45rem rgba(120,180,255,.14);
+  max-height:100%;
+}
+.screen .hl{color:var(--green);text-shadow:0 0 .5rem rgba(61,220,151,.35)}
+.screen .warn{color:var(--amber)}
+.screen .err{color:var(--red)}
+.screen .dim{color:var(--dim)}
+.console-ctrl{
+  flex:none;display:flex;align-items:center;gap:.55rem;height:1.5rem;padding:0 .35rem;
+  font-family:var(--mono);font-size:.55rem;color:#4a5872;letter-spacing:.16em;
+}
+.console-ctrl .brand{text-shadow:0 1px 0 rgba(0,0,0,.6)}
+.console-ctrl .btns{margin-left:auto;display:flex;gap:.3rem}
+.console-ctrl .btns i{width:.5rem;height:.28rem;border-radius:.1rem;background:#0d1320;border:1px solid #2a3550;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}
+.console-ctrl .pwr{width:.34rem;height:.34rem;border-radius:50%;background:#22432f}
+.page.on .console-ctrl .pwr{background:var(--green);box-shadow:0 0 .4rem var(--green)}
+.console-ctrl .chip{border:1px solid #2a3550;border-radius:99px;padding:0 .5rem;color:var(--muted);letter-spacing:0}
+
+/* ── 銘牌 / 貼紙 ── */
+.plate{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.13em;color:var(--amber);
+  border:1px dashed rgba(245,192,74,.4);border-radius:.35rem;padding:.4rem .8rem;
+  background:rgba(245,192,74,.04);flex:none;
+  opacity:0;transition:opacity .45s;transition-delay:calc(var(--i,0)*90ms);
+}
+.page.on .plate{opacity:1}
+.sticker{
+  display:flex;gap:.8rem;align-items:center;background:#e9c85e;color:#181205;
+  border-radius:.18rem;padding:.55rem 1rem;transform:rotate(-.35deg);
+  font-size:.88rem;line-height:1.55;font-weight:500;flex:none;
+  box-shadow:0 .35rem 1rem -.45rem rgba(0,0,0,.7);
+  opacity:0;transition:opacity .45s .28s;
+}
+.page.on .sticker{opacity:1}
+.sticker .bar{
+  flex:none;width:1.8rem;align-self:stretch;min-height:1.4rem;opacity:.85;
+  background:repeating-linear-gradient(90deg,#181205 0 2px,transparent 2px 5px,#181205 5px 6px,transparent 6px 9px);
+}
+.sticker b{font-weight:700}
+.sticker small{display:block;font-size:.7rem;font-weight:400;opacity:.75}
+.sticker.cy{background:#bfe3f7;color:#0a1a26}
+.sticker.warn{border-image:repeating-linear-gradient(45deg,#181205 0 10px,#e9c85e 10px 20px) 6;border-style:solid;border-width:0 .35rem}
+
+/* ── LED 讀數 ── */
+.readout-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}
+.readout{background:#080d16;border:1px solid var(--line);border-radius:.4rem;padding:.6rem 1rem;text-align:center}
+.readout .lab{font-size:.72rem;color:var(--muted)}
+.readout .val{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--green);text-shadow:0 0 .8rem rgba(61,220,151,.5);line-height:1.25}
+.readout .val small{font-size:.8rem;color:var(--muted);text-shadow:none}
+.readout .val.txt{font-size:.95rem;color:var(--text);text-shadow:none;padding:.5rem 0}
+
+/* ── chain ── */
+.chain{display:flex;align-items:stretch;flex-wrap:wrap}
+.chain .stp{background:#0d141f;border:1px solid var(--line);border-radius:.35rem;padding:.5rem .8rem;font-size:.82rem;font-weight:600;flex:1;min-width:5.5rem;text-align:center}
+.chain .stp small{display:block;color:var(--muted);font-weight:400;font-size:.68rem;line-height:1.5}
+.chain .arr{display:flex;align-items:center;padding:0 .4rem;color:var(--cyan);font-family:var(--mono);font-size:.85rem}
+
+/* ── table ── */
+.tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:.4rem}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;color:var(--cyan);padding:.5rem .9rem;border-bottom:1px solid var(--line);background:rgba(76,194,245,.04);font-weight:500}
+td{padding:.5rem .9rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+
+/* ── lists ── */
+.guard-list{list-style:none}
+.guard-list li{padding:.4rem 0 .4rem 1.5rem;position:relative;font-size:.84rem;border-bottom:1px dashed var(--line-soft);line-height:1.55}
+.guard-list li:last-child{border-bottom:none}
+.guard-list li span{color:var(--muted)}
+.guard-in li::before{content:"✕";position:absolute;left:.1rem;color:var(--red);font-family:var(--mono);font-weight:700}
+.guard-out li::before{content:"⏎";position:absolute;left:.1rem;color:var(--green);font-family:var(--mono);font-weight:700}
+.lever li::before{content:"›";position:absolute;left:.25rem;color:var(--cyan);font-family:var(--mono);font-weight:700}
+
+/* ── quotes ── */
+.quote{border-left:.16rem solid var(--cyan);padding:.1rem 0 .1rem .8rem;margin:.5rem 0}
+.quote .q{font-size:.9rem;font-weight:600}
+.quote .land{font-size:.78rem;color:var(--muted)}
+.quote .src{font-family:var(--mono);font-size:.62rem;color:var(--dim)}
+
+/* ── 工單 ── */
+.workorder{
+  background:#ece5d3;color:#241c10;border-radius:.2rem;padding:1.1rem 1.5rem;
+  transform:rotate(-.4deg);position:relative;max-width:52rem;margin:0 auto;width:100%;
+  box-shadow:0 1rem 2.6rem -1.1rem rgba(0,0,0,.85);
+  font-family:var(--mono);flex:none;
+  opacity:0;transition:opacity .5s .15s;
+}
+.page.on .workorder{opacity:1}
+.workorder::before,.workorder::after{
+  content:"";position:absolute;top:-.6rem;width:4.5rem;height:1.3rem;background:rgba(255,255,255,.28);
+  border:1px solid rgba(0,0,0,.06);transform:rotate(-3deg);
+}
+.workorder::before{left:2rem}
+.workorder::after{right:2rem;transform:rotate(2.5deg)}
+.wo-head{display:flex;justify-content:space-between;border-bottom:2px solid #241c10;padding-bottom:.35rem;margin-bottom:.2rem;font-size:.74rem;font-weight:700;letter-spacing:.06em}
+.workorder table{font-size:.76rem}
+.workorder th{color:#6b5c3e;background:none;border-bottom:1px solid #c9bd9f;font-size:.6rem}
+.workorder td{border-bottom:1px dashed #c9bd9f;color:#241c10;padding:.42rem .6rem}
+.workorder td.time{white-space:nowrap;font-weight:700}
+.wo-note{font-size:.66rem;color:#6b5c3e;margin-top:.55rem}
+.route{border:1.5px dashed #241c10;border-radius:.2rem;padding:.5rem .8rem;margin-top:.55rem}
+.route h5{font-size:.76rem;letter-spacing:.04em}
+.route p{font-size:.7rem;margin-top:.1rem;color:#463a22}
+.route p b{font-weight:700;color:#241c10}
+.stamp{
+  display:inline-block;border:2px solid #b3452e;color:#b3452e;border-radius:.2rem;
+  font-size:.58rem;font-weight:700;letter-spacing:.2em;padding:0 .45rem;transform:rotate(-4deg);
+  margin-left:.5rem;vertical-align:middle;
+}
+
+/* ── refs ── */
+.refs a{display:block;color:var(--muted);text-decoration:none;font-size:.8rem;padding:.34rem 0;border-bottom:1px dashed var(--line-soft);transition:color .15s}
+.refs a:hover{color:var(--cyan)}
+.refs a::before{content:"⌁ ";font-family:var(--mono);color:var(--dim)}
+.note{font-size:.7rem;color:var(--dim);margin-top:.5rem}
+
+/* ── agenda / minimap ── */
+.agenda-item{display:flex;gap:.9rem;align-items:flex-start}
+.agenda-item .no{
+  font-family:var(--mono);font-size:.9rem;color:var(--cyan);border:1px solid rgba(76,194,245,.4);
+  border-radius:.3rem;width:1.7rem;height:1.7rem;display:flex;align-items:center;justify-content:center;flex:none;margin-top:.15rem;
+}
+.agenda-item h4{font-size:1rem}
+.agenda-item p{font-size:.78rem;color:var(--muted)}
+.minimap{display:flex;gap:.5rem;align-items:flex-end;justify-content:center;flex-wrap:wrap}
+.mini-rack{
+  width:2.9rem;height:4.7rem;border:1px solid var(--line);border-radius:.25rem;background:var(--steel);
+  display:flex;flex-direction:column;gap:.18rem;padding:.35rem .3rem .25rem;cursor:pointer;position:relative;
+  transition:transform .18s,border-color .18s;text-decoration:none;
+}
+.mini-rack u{display:block;height:.35rem;border-radius:.1rem;background:var(--unit-hi);border:1px solid rgba(36,49,73,.8);text-decoration:none}
+.mini-rack .mled{width:.28rem;height:.28rem;border-radius:50%;background:var(--green);box-shadow:0 0 .3rem var(--green);position:absolute;top:.18rem;right:.28rem}
+.mini-rack .rid{font-family:var(--mono);font-size:.52rem;color:var(--dim);text-align:center;margin-top:auto}
+.mini-rack:hover{transform:translateY(-.3rem);border-color:var(--cyan)}
+.mini-rack::after{
+  content:attr(data-name);position:absolute;top:-1.7rem;left:50%;transform:translateX(-50%);
+  font-size:.62rem;font-family:var(--mono);color:var(--cyan);white-space:nowrap;opacity:0;transition:.18s;pointer-events:none;
+  background:#0b1220;border:1px solid var(--line);padding:.1rem .45rem;border-radius:.25rem;
+}
+.mini-rack:hover::after{opacity:1}
+
+/* ════════ 直式手機 fallback ════════ */
+@media (orientation:portrait) and (max-width:840px){
+  html{font-size:13px}
+  body{scroll-snap-type:none}
+  .page{height:auto;min-height:100svh}
+  .stage{width:100%;height:auto;padding:3.6rem .9rem 1.6rem}
+  .stage.cover{min-height:100svh;padding:0}
+  .u2,.u3,.u4,.readout-row{grid-template-columns:1fr}
+  .chain{flex-direction:column}
+  .chain .arr{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+  .rack-title h2{white-space:normal;font-size:1.15rem}
+  .rack-tele{display:none}
+  .rail{width:.6rem}
+  .cover .title h1{font-size:2rem}
+  .cover .title .sub{font-size:1.3rem}
+  .units{overflow:visible;justify-content:flex-start}
+  .screen pre{font-size:.7rem}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<nav id="topnav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#p01"><span class="p">dean@infra:~$</span> cd /dc/aisle-1</a>
+    <div class="nav-links" id="navlinks">
+      <a href="#p03" data-key="r01"><b>R01</b>痛點</a>
+      <a href="#p04" data-key="r02"><b>R02</b>架構</a>
+      <a href="#p05" data-key="r03"><b>R03</b>思維一</a>
+      <a href="#p11" data-key="r04"><b>R04</b>思維二</a>
+      <a href="#p16" data-key="r05"><b>R05</b>思維三</a>
+      <a href="#p17" data-key="r06"><b>R06</b>思維四</a>
+      <a href="#p20" data-key="r07"><b>R07</b>守門</a>
+      <a href="#p21" data-key="r08"><b>R08</b>閉環</a>
+      <a href="#p23" data-key="r09"><b>R09</b>時間帳</a>
+      <a href="#p24" data-key="r10"><b>R10</b>參考</a>
+    </div>
+    <span class="nav-hint">←→ 翻頁 · F 全螢幕</span>
+  </div>
+</nav>
+<div id="pageno">01 / 25</div>
+
+<!-- ═══ P01 封面(大會版型) ═══ -->
+<section class="page" id="p01" data-rid="COVER">
+  <div class="stage cover">
+    <img class="abs logo" src="assets/oneconf-logo.png" alt="ONEConf">
+    <img class="abs mobius" src="assets/mobius.png" alt="">
+    <div class="abs title">
+      <h1>Infra Slack AI 助理<span class="sub">從查詢 Flow 到 Agent 設計</span></h1>
+    </div>
+    <div class="abs tagline">
+      <p>把 infra 團隊的排障直覺,工程化成 Slack 裡的 AI 助理</p>
+      <p class="by">Dean Wang · Hyjay Infra · 2026</p>
+    </div>
+    <img class="abs slogan" src="assets/oneloop-slogan.png" alt="ONE LOOP">
+  </div>
+</section>
+
+<!-- ═══ P02 Agenda(機房平面圖) ═══ -->
+<section class="page rk" id="p02" data-rid="NOC">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">NOC</span>
+          <div class="rack-title"><span class="eyebrow">ABOUT / AGENDA</span><h2>今天分享四個思維</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.0°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row" style="grid-template-columns:1fr 1.8fr">
+              <div class="unit" style="--i:0">
+                <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <div class="unit-label">SPEAKER</div>
+                  <h4>Dean Wang</h4>
+                  <p>Hyjay Infra / DevOps<br>監控、網路、雲端維運<br>Slack AI 助理專案</p>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:1">
+                <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content" style="display:flex;flex-direction:column;gap:.7rem;justify-content:center">
+                  <div class="agenda-item"><span class="no">1</span><div><h4>Skill 的形狀,來自人怎麼問問題</h4><p>查詢 flow 的設計</p></div></div>
+                  <div class="agenda-item"><span class="no">2</span><div><h4>固定查詢留給 bot,判斷才給 AI</h4><p>告警 triage 分工</p></div></div>
+                  <div class="agenda-item"><span class="no">3</span><div><h4>換模型:弱點清單=工程需求清單</h4><p>能力輪廓會變;系統對了,模型可換</p></div></div>
+                  <div class="agenda-item"><span class="no">4</span><div><h4>規則要寫成「數數題」,不是「判斷題」</h4><p>遵從性工程</p></div></div>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+            </div>
+            <div class="unit" style="--i:2">
+              <div class="unit-side"><i class="led c"></i></div>
+              <div class="unit-content">
+                <div class="unit-label" style="text-align:center">機房平面圖 · AISLE 1 · 點機櫃直達</div>
+                <div class="minimap">
+                  <a class="mini-rack" href="#p03" data-name="R01 · 痛點"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R01</span></a>
+                  <a class="mini-rack" href="#p04" data-name="R02 · 架構"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R02</span></a>
+                  <a class="mini-rack" href="#p05" data-name="R03 · 思維一 + 壞碟實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R03</span></a>
+                  <a class="mini-rack" href="#p11" data-name="R04 · 思維二 + DDoS 實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R04</span></a>
+                  <a class="mini-rack" href="#p16" data-name="R05 · 思維三"><span class="mled"></span><u></u><u></u><span class="rid">R05</span></a>
+                  <a class="mini-rack" href="#p17" data-name="R06 · 思維四 + 糾錯實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R06</span></a>
+                  <a class="mini-rack" href="#p20" data-name="R07 · Runtime 守門"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R07</span></a>
+                  <a class="mini-rack" href="#p21" data-name="R08 · 改善閉環"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R08</span></a>
+                  <a class="mini-rack" href="#p23" data-name="R09 · 時間帳"><span class="mled"></span><u></u><u></u><span class="rid">R09</span></a>
+                  <a class="mini-rack" href="#p24" data-name="R10 · 參考來源"><span class="mled"></span><u></u><u></u><span class="rid">R10</span></a>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i></div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> NOC · PATROL ROUTE LOADED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P03 R01 痛點 ═══ -->
+<section class="page rk" id="p03" data-rid="R01" data-nav="r01">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R01</span>
+          <div class="rack-title"><span class="eyebrow">WHY</span><h2>三個真實的日常</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.4°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u3">
+              <div class="unit" style="--i:0">
+                <div class="unit-side"><i class="led a"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content"><div class="unit-label">PAIN-01</div><h4>告警的訊噪比</h4><p>重要訊息被次級告警洗版,真正該看的曝光不足</p></div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:1">
+                <div class="unit-side"><i class="led a"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content"><div class="unit-label">PAIN-02</div><h4>查詢的分散</h4><p>查一件事要開監控、日誌、資產表、Portal 好幾個視窗</p></div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:2">
+                <div class="unit-side"><i class="led a"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content"><div class="unit-label">PAIN-03</div><h4>知識的集中</h4><p>判斷經驗只存在少數資深同仁的腦中</p></div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>Slack 只是入口 —— 真正的工作,是把<b>資料來源、判斷順序、停止條件、安全邊界</b>工程化</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-A · 3 UNITS ONLINE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P04 R02 架構 ═══ -->
+<section class="page rk" id="p04" data-rid="R02" data-nav="r02">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R02</span>
+          <div class="rack-title"><span class="eyebrow">OVERVIEW</span><h2>形態:Slack 裡的 AI 助理</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.1°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led g"></i><i class="led c"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label">TOPOLOGY</div>
+                <div class="chain">
+                  <div class="stp">Slack<small>同仁提問 / 告警進入</small></div>
+                  <div class="arr">→</div>
+                  <div class="stp" style="border-color:rgba(76,194,245,.45)">AI Agent<small style="color:var(--cyan)">+ 20 多個領域 skill<br>路由 · 查證 · 判斷 · 收斂</small></div>
+                  <div class="arr">→</div>
+                  <div class="stp">資料源<small>日誌搜尋 · 監控指標 · 主機監控<br>網管 Portal · 資產清單 · 文件/工單</small></div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="sticker cy"><span class="bar"></span><p>原則:<b>唯讀為主</b>;寫入只開受控白名單(告警靜音、固定通知等),各自有確認流程</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-A · READ-ONLY MODE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P05 R03 思維一 · 問法 ═══ -->
+<section class="page rk" id="p05" data-rid="R03" data-nav="r03">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R03</span>
+          <div class="rack-title"><span class="eyebrow">思維一 · 查詢 FLOW 的設計 · 1/6</span><h2>Skill 的形狀,來自人怎麼問問題</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.0°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="console" style="--i:0">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-human">問</span><span class="name">同仁實際的問法</span><span class="time">#infra 頻道</span></div>
+                  <pre>「這個 IP 是誰在用?」
+
+「這條線路報修要找誰?」
+
+「服務 A 最近 5xx 是不是變多了?」
+
+「這台交換器的設定誰改過?」
+
+「值班到幾點才能 QK?」</pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#01</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:.65rem;justify-content:center">
+                <div class="unit slim" style="--i:1"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="no">①</span><span class="body"><b>意圖分類</b> —— 同一句話屬於哪一類問題</span></div><div class="unit-hd"><i></i></div></div>
+                <div class="unit slim" style="--i:2"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="no">②</span><span class="body"><b>關鍵識別資訊</b> —— 抓出 IP/服務名/時間窗,交棒用的「車票」</span></div><div class="unit-hd"><i></i></div></div>
+                <div class="unit slim" style="--i:3"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="no">③</span><span class="body"><b>指定資料源</b> —— 這一類問題,規定去哪裡查</span></div><div class="unit-hd"><i></i></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-A · INTENT ROUTER</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P06 R03 · flow ═══ -->
+<section class="page rk" id="p06" data-rid="R03" data-nav="r03">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R03</span>
+          <div class="rack-title"><span class="eyebrow">思維一 · 2/6</span><h2>單項查詢 → 排障 flow</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.0°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label">TROUBLESHOOTING FLOW</div>
+                <div class="chain">
+                  <div class="stp">告警裡的 IP</div><div class="arr">→</div>
+                  <div class="stp">定位主機</div><div class="arr">→</div>
+                  <div class="stp">看資源狀態</div><div class="arr">→</div>
+                  <div class="stp">撈服務日誌</div><div class="arr">→</div>
+                  <div class="stp">找 owner 通知</div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit" style="--i:1">
+              <div class="unit-side"><i class="led c"></i></div>
+              <div class="unit-content"><p style="color:var(--text)">每一步交棒都帶「<b style="color:var(--cyan)">車票</b>」:主機/服務識別碼、資料源索引、時間窗</p></div>
+              <div class="unit-hd"><i></i></div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>這條鏈就是 infra 工程師腦中的<b>排障直覺</b> —— skill 串連只是把它顯式化</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-A · TICKET RELAY</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P07 R03 · 單一來源 ═══ -->
+<section class="page rk" id="p07" data-rid="R03" data-nav="r03">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R03</span>
+          <div class="rack-title"><span class="eyebrow">思維一 · 3/6</span><h2>每種問題,只准查一個地方</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.0°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label">ROUTING TABLE</div>
+                <div class="tbl-wrap">
+                  <table>
+                    <tr><th>問題類型</th><th>唯一主來源</th><th>備援</th></tr>
+                    <tr><td>線路技術資訊(頻寬/VLAN/介接)</td><td>網管 Portal(即時)</td><td>快照檔(標註日期)</td></tr>
+                    <tr><td>單一 IP 的用途與歸屬</td><td>資產清單(即時)</td><td>快照檔(標註日期)</td></tr>
+                    <tr><td>報修聯絡窗口</td><td>聯絡資訊頁(即時)</td><td>—</td></tr>
+                  </table>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p><b>One primary source per fact family</b> —— 消滅「一題翻五個系統」,答案還能標注來源</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-A · SINGLE SOURCE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P08 R03 · CASE01 1/2 ═══ -->
+<section class="page rk" id="p08" data-rid="R03" data-nav="r03">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R03</span>
+          <div class="rack-title"><span class="eyebrow">思維一 · 實戰 · 4/6</span><h2>實戰:一顆壞碟(1/2)—— 告警與首次判斷</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="console" style="--i:0">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-bot">J</span><span class="name">Jarvis</span><span class="time">① 初始訊息 · 18:16:29</span></div>
+                  <pre>[TRIAGE:netapp-disk]
+skill=hyjay-nabox-storage
+cluster=A800_Site*
+node=A800_Site*-01
+event=raid.config.filesystem
+      .disk.failed
+severity=<span class="err">error</span>
+serial=44L0A•••TZ1H bay=43
+model=X4010KCM7V1T9NTE
+site=Remote
+failure_reason=<span class="err">disk failed</span>
+fail_time=06-18 18:13:29</pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#02</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+              <div class="console" style="--i:1">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 首次回覆 · 18:20:40(+4 分 11 秒)</span></div>
+                  <pre>已複查並發到 #hyjay-••。
+事實:
+- relay 指向壞碟:SN 44L0A•••TZ1H /
+  bay 43 / A800_SiteA-01
+- nabox probe 已解析到 disk:1.0.43
+- <span class="hl">實體位置:SiteB / 3F-B07 14U / bay 43</span>
+- 我已重試 probe 到 18:20 GMT+8,目前
+  nabox 尚未抓到 failure edge /
+  takeover spare;<span class="warn">已在通知內標明
+  「Harvest/scrape 延遲,需 ONTAP CLI
+  交叉確認」</span>
+發送結果:
+- target: slack:C09B•••••
+- ts/message_id: 1781778032.0•••
+<span class="dim">gpt-5.5 · context 38%</span></pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#03</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+            </div>
+            <div class="sticker cy"><span class="bar"></span><p>訊息原文照登(僅遮罩序號與頻道)—— <b>4 分 11 秒定位到機櫃層</b>;抓不到的照實標,通知照發</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-A · CASE-01 · 1/2</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P09 R03 · CASE01 2/2 ═══ -->
+<section class="page rk" id="p09" data-rid="R03" data-nav="r03">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R03</span>
+          <div class="rack-title"><span class="eyebrow">思維一 · 實戰 · 5/6</span><h2>實戰:一顆壞碟(2/2)——「再檢查一次」</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="console" style="--i:0;width:100%;max-width:80rem;margin:0 auto">
+              <div class="screen">
+                <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">③ 22:42 值班同仁:「再檢查一次」→ 79 秒後完整回覆(原文照登)</span></div>
+                <pre>再檢查結果:SN 44L0A•••TZ1H / bay43 目前已是 <span class="hl">③ 已換碟/已恢復</span>。
+📅 2026-06-18 NetApp 壞碟 → 換碟上線 (GMT+8)
+│ 💽 disk 1.0.43 · 舊 SN 44L0A•••TZ1H → 新 SN S6H0N•••0239
+│ 💽 新碟 model X4010S173A1T9NTE
+│ 👤 current owner A800_SiteA-02 · cluster A800_SiteA
+│ 📍 實體 SiteB · 機櫃 3F-B07 14U · bay 43
+├── [18:13] relay/EMS 回報壞碟
+│    └── ⚠️ raid.config.filesystem.disk.failed / disk failed
+├── [18:15–19:45] disk_new_status series 中斷
+│    └── 🕒 Prometheus 上 1.0.43 在 18:15 後掉出,19:45 後重新出現
+└── [22:42] 目前狀態
+     ├── ✅ disk 1.0.43 已 online:disk_new_status=1
+     ├── ✅ container_type=shared / shared=true / failed=false
+     ├── ✅ aggr_disk_max_busy_now=0.2%,目前無重建 busy
+     └── 🕒 takeover spare 仍未由 nabox probe 解析出來
+判斷:
+- 現場 bay43 已有新碟上線並完成 ADP shared 狀態。
+- 目前沒有 rebuild active 跡象。
+- 「待確認頂上 spare」仍是限制:nabox probe 沒有列出 takeovers;需 ONTAP CLI
+  storage aggregate show-status 交叉確認。
+<span class="dim">gpt-5.5 · context 39%</span></pre>
+              </div>
+              <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#04</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-A · CASE-01 · 2/2</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P10 R03 · skill 追查 ═══ -->
+<section class="page rk" id="p10" data-rid="R03" data-nav="r03">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R03</span>
+          <div class="rack-title"><span class="eyebrow">思維一 · SKILL 串連 · 6/6</span><h2>壞碟之後,skill 還往下追:影響到誰?</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="plate" style="--i:0">▍skill 內建的下一層追查(依 skill 設計呈現;名稱已遮蔽)</div>
+            <div class="unit slim" style="--i:1"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">①</span><span class="body">重建壓力歸因:owner aggregate 的 busy% —— 先分清是 rebuild 還是客戶負載</span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:2"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">②</span><span class="body">該 aggr 上的 volume 延遲有沒有變高:<span style="font-family:var(--mono);font-size:.78rem">volume_avg_latency</span> 逐 volume 比對基線</span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:3"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">③</span><span class="body">裁決不看絕對值:headroom ratio &lt; 1 →「無真正效能影響」—— 即使 latency 漲 2–3 倍;ratio ≥ 1 才是真 bottleneck</span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:4"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">④</span><span class="body">延遲異常的 volume 是誰在用:volume/LUN 命名 → 對應到某台 DB(名稱遮蔽)</span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:5"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">⑤</span><span class="body">該 DB 的角色(主庫/從庫/報表)→ 推導受影響的服務與嚴重度</span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:6"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body">→ 通知帶出去的是「<b>影響面</b>」,不只是「壞了一顆碟」<br><span style="font-size:.72rem;color:var(--dim)">※ 前兩頁的真實事件沒有走到 ④⑤:busy 0.2%、headroom 健康,②③ 就收斂了 —— 但這條路一直都在 skill 裡,延遲一旦異常就會往下追</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="sticker"><span class="bar"></span><p>每一步的輸出就是下一步的車票:<b>aggregate → volume → 使用者 → 角色 → 影響面</b></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-A · CASE-01 ARCHIVED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P11 R04 · 決策樹 ═══ -->
+<section class="page rk" id="p11" data-rid="R04" data-nav="r04">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">思維二 · 告警 TRIAGE 分工 · 1/5</span><h2>分工決策樹:這件事,需要 AI 嗎?</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.6°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led c"></i><i class="led g"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label" style="text-align:center">DECISION TREE · 這個任務,需要語意判斷嗎?</div>
+                <div class="unit-row u4">
+                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
+                    <div style="font-size:.72rem;color:var(--muted)">不需要判斷</div>
+                    <div style="font-size:.98rem;font-weight:700;color:var(--green)">bot / 腳本</div>
+                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">毫秒級 · 0 token</div>
+                  </div>
+                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
+                    <div style="font-size:.72rem;color:var(--muted)">需要判斷 · 唯讀</div>
+                    <div style="font-size:.98rem;font-weight:700;color:var(--cyan)">AI + skill</div>
+                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">分鐘級 · 跨來源綜合</div>
+                  </div>
+                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
+                    <div style="font-size:.72rem;color:var(--muted)">要寫入 · 可規則化</div>
+                    <div style="font-size:.98rem;font-weight:700;color:var(--amber)">controller / 流程</div>
+                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">受控白名單+確認</div>
+                  </div>
+                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .8rem;background:#0d141f">
+                    <div style="font-size:.72rem;color:var(--muted)">要寫入 · 高風險</div>
+                    <div style="font-size:.98rem;font-weight:700;color:var(--red)">人核准</div>
+                    <div style="font-family:var(--mono);font-size:.64rem;color:var(--dim)">目標與業務取捨</div>
+                  </div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>不是取代,是分工 —— <b>AI 處理不確定性;確定性的工作,編譯成程式</b><small>樹以「步驟」為單位,同一個 skill 通常混合;看懂的判斷點就腳本化 —— 朝 0 token 持續遷移</small></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · WORKLOAD SPLIT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P12 R04 · triage + 統計 ═══ -->
+<section class="page rk" id="p12" data-rid="R04" data-nav="r04">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">思維二 · 2/5</span><h2>典型場景:告警 triage</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.6°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="readout-row">
+                  <div class="readout"><div class="lab">上線後兩個月(6–7 月)</div><div class="val txt">實測工作量</div></div>
+                  <div class="readout"><div class="lab">告警判斷轉發</div><div class="val">116<small> 次</small></div></div>
+                  <div class="readout"><div class="lab">真人問答</div><div class="val">177<small> 次</small></div></div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit" style="--i:1">
+              <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label">TRIAGE PIPELINE</div>
+                <div class="chain">
+                  <div class="stp">監控告警</div><div class="arr">→</div>
+                  <div class="stp">bot 搬運</div><div class="arr">→</div>
+                  <div class="stp" style="border-color:rgba(76,194,245,.45)">AI 查證</div><div class="arr">→</div>
+                  <div class="stp">初判 + 摘要</div><div class="arr">→</div>
+                  <div class="stp">通知人</div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit-row u2">
+              <div class="unit" style="--i:2"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><h4 style="color:var(--cyan)">查證後才通知</h4><p>AI 必須先查權威來源核實,不是轉發告警原文</p></div><div class="unit-hd"><i></i></div></div>
+              <div class="unit" style="--i:3"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><h4 style="color:var(--cyan)">送達回執才算送達</h4><p>通知有回執;狀態不明就要求人工確認,不重試</p></div><div class="unit-hd"><i></i></div></div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · TRIAGE ACTIVE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P13 R04 · DDoS 1/3 ═══ -->
+<section class="page rk" id="p13" data-rid="R04" data-nav="r04">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">思維二 · 實戰 · 3/5</span><h2>實戰:DDoS 三層查證(1/3)—— 提問與 CF edge</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.8°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="console" style="--i:0">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-human">值</span><span class="name">值班同仁</span><span class="time">① 提問原文 · 17:39 GMT+8</span></div>
+                  <pre>@Hyjay AI 查
+時間點16:13
+CLOUDFLARE [下午 4:13]
+An HTTP DDoS attack against
+your zone cdn•••••.net,
+targeting the host
+b897••.••••••••.com,
+(1.75k rps) has been
+automatically detected and
+mitigated though the attack
+may still be ongoing.
+Managed Rule ID: 6e3c••••</pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#05</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+              <div class="console" style="--i:1">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 完整報告 · 17:49(10 分 19 秒)節錄上:CF edge</span></div>
+                  <pre>結論:<span class="hl">mitigated-clean</span> —— CF L7DDoS managed
+rule 自動攔截,origin 完全未受影響。
+CF edge 攔截量(1h 窗口):
+l7ddos          managed_challenge  1,384,838
+firewallCustom  log                  631,087
+ratelimit       log                  578,136
+ratelimit       managed_challenge      8,718
+firewallCustom  block                    141
+ip              allow                     12
+CF 總計 2,602,932 事件 vs origin 僅 624,565
+→ <span class="hl">約 76% 攻擊被 edge 攔截</span>
+<span class="warn">⚠ firewallCustom 設為 log(看到但沒擋),
+  141 筆才真正 block</span></pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#06</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+            </div>
+            <div class="sticker cy"><span class="bar"></span><p>訊息原文照登(僅遮罩域名/客戶/規則 ID)—— <b>第一層:edge 擋了多少、哪些規則其實只在看</b></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-B · CASE-02 · 1/3</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P14 R04 · DDoS 2/3 ═══ -->
+<section class="page rk" id="p14" data-rid="R04" data-nav="r04">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">思維二 · 實戰 · 4/5</span><h2>實戰:DDoS 三層查證(2/3)—— 每一步怎麼知道下一步</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.8°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="plate" style="--i:0">▍同一次查證的推導鏈(每步標「依據」;這就是思維一的車票在跑)</div>
+            <div class="unit slim" style="--i:1"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">①</span><span class="body">告警 → 解出 zone / host / 時間窗 15:41–16:41<span class="basis">告警內的 dashboard URL</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:2"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">②</span><span class="body">host 前綴 b897 → 客戶定位 ZT•••<span class="basis">skill 的 random_id 對照規則</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:3"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">③</span><span class="body">客戶 → origin 走哪組 HA → log 索引 ha-•••-07.07<span class="basis">客戶 → 架構路由表</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:4"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">④</span><span class="body">ES 查穿透:624,565 筆、逐分鐘峰值 → 鎖定 backend<span class="basis">索引 + 時間窗 + host 過濾</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:5"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">⑤</span><span class="body">查該 backend 健康:Tr / 5xx / termination<span class="basis">同索引 HAProxy 欄位</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit-row u2">
+              <div class="unit" style="--i:6">
+                <div class="unit-side"><i class="led a"></i></div>
+                <div class="unit-content"><h4 style="color:var(--amber);font-size:.88rem">同樣的事,沒有助理時(熟手估算)</h4>
+                <p style="font-size:.78rem;line-height:1.7">對時窗 ~5 分 · 查客戶對照 5–10 分 · 翻路由/架構表 ~10 分<br>寫 ES query+等結果 10–15 分 · backend 判讀 ~10 分 · 彙整報告 15–30 分<br>
+                <b style="color:var(--text)">→ 合計約 1 小時起跳</b>,且要熟 4 個以上系統;半夜還要先醒</p></div>
+                <div class="unit-hd"><i></i></div>
+              </div>
+              <div class="unit" style="--i:7">
+                <div class="unit-side"><i class="led g"></i></div>
+                <div class="unit-content"><h4 style="color:var(--green);font-size:.88rem">AI</h4>
+                <p style="font-size:.78rem;line-height:1.7">一句話輸入 → <b style="color:var(--text);font-family:var(--mono);font-size:1.15rem">10 分 19 秒</b><br>全程附證據</p></div>
+                <div class="unit-hd"><i></i></div>
+              </div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>flow 的價值不在單步查詢,在「<b>知道下一步查哪、拿什麼去查</b>」—— 車票一路傳到底</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-B · CASE-02 · 2/3</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P15 R04 · DDoS 3/3 ═══ -->
+<section class="page rk" id="p15" data-rid="R04" data-nav="r04">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">思維二 · 實戰 · 5/5</span><h2>實戰:DDoS 三層查證(3/3)—— ES 接力到 backend</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.8°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="console" style="--i:0;width:100%;max-width:80rem;margin:0 auto">
+              <div class="screen">
+                <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">同一則報告 節錄下:ES origin 穿透 × backend 健康(原文照登)</span></div>
+                <pre>Origin 穿透量(ES 逐分鐘):              Origin 健康(backend:klt•••_32082):
+16:09   23,074                          Tr avg 2.6ms(max 10,017ms 孤立 outlier)
+16:10  102,882                          5xx = 0(峰值分鐘 16:11 亦為 0)
+16:11  <span class="hl">265,368 ← PEAK ≈ 4,423 rps</span>       server-side termination(sH/sD/sC)= 0
+16:12   66,021                          client-side CR/CD = 24(客戶端斷線)
+16:13   74,641 ← 告警時間點             → <span class="hl">攻擊期間後端完全健康,無 down window</span>
+16:14   82,541
+16:15    9,155                          Origin per-CDN:攻擊 100% 走 CF,
+總穿透 624,565(sanity check 通過)       無其他 CDN 路徑
+
+建議(節錄):後端完全無影響,不需任何緊急操作;firewallCustom 考慮改 block;
+對 /api/•••/GetSiteConfigs 加更嚴格 rate limit
+<span class="dim">Ornith-1.0-35B-FP8 · context 54%</span></pre>
+              </div>
+              <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#07</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>CF 看「擋了多少」→ ES 看「漏了多少」→ backend 看「傷了沒」—— <b>一則報告三層閉環;跑在地端 35B 上</b></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-B · CASE-02 ARCHIVED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P16 R05 思維三 ═══ -->
+<section class="page rk" id="p16" data-rid="R05" data-nav="r05">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R05</span>
+          <div class="rack-title"><span class="eyebrow">思維三 · 能力輪廓會變;系統對了,模型可換</span><h2>換模型:弱點清單,就是工程需求清單</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 22.8°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="unit" style="--i:0">
+                <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <h4 style="color:var(--green);margin-bottom:.4rem">換得起的</h4>
+                  <ul class="guard-list lever">
+                    <li><b>速度</b> —— <span>8→23.3 tok/s,2.9×(量化+投機解碼)</span></li>
+                    <li><b>資料主權</b> —— <span>查詢內容不出門</span></li>
+                    <li><b>掌控度</b> —— <span>引擎參數自己調</span></li>
+                  </ul>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:1">
+                <div class="unit-side"><i class="led a"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <h4 style="color:var(--amber);margin-bottom:.4rem">換不回的 → 圍法</h4>
+                  <ul class="guard-list lever">
+                    <li><b>思考深度</b> <span>→ 靠 skill 顯式化 flow(思維一)</span></li>
+                    <li><b>指令遵從性</b> <span>→ 數數題+runtime 圍欄(思維四)</span></li>
+                    <li><b>生態</b> <span>→ bot/腳本自建(思維二)</span></li>
+                    <li><b>語意廣度</b> <span>→ 黑話對照表(車票第 0 步)</span></li>
+                  </ul>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>「換不回的」清單 = 其他三個思維的需求說明書 —— <b>系統做對了,模型是可換零件</b><small>※ 相對前沿 API 而言;本地模型間 27B 整體優於先前 35B MoE —— 能力輪廓不同,非參數量排大小</small></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · HOT-SWAPPABLE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P17 R06 · 四失敗 ═══ -->
+<section class="page rk" id="p17" data-rid="R06" data-nav="r06">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R06</span>
+          <div class="rack-title"><span class="eyebrow">思維四 · 遵從性工程 · 1/3</span><h2>規則明文禁止,它照犯</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 25.1°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="unit" style="--i:0"><div class="unit-side"><i class="led r"></i></div><div class="unit-content"><h4>查詢回零筆 → 回答「服務正常」</h4><p>零筆只代表此條件查不到 —— 模型卻直接下了 domain 結論</p></div><div class="unit-hd"><i></i></div></div>
+              <div class="unit" style="--i:1"><div class="unit-side"><i class="led r"></i></div><div class="unit-content"><h4>同一件事,換關鍵字連查 23 輪</h4><p>指引早就寫了「重複無新結果就停」,它停不下來</p></div><div class="unit-hd"><i></i></div></div>
+              <div class="unit" style="--i:2"><div class="unit-side"><i class="led r"></i></div><div class="unit-content"><h4>放著正確工具,去找幽靈工具</h4><p>反覆搜尋一個不存在的發送工具,不用手邊那把</p></div><div class="unit-hd"><i></i></div></div>
+              <div class="unit" style="--i:3"><div class="unit-side"><i class="led r"></i></div><div class="unit-content"><h4>skill 明定的必要輸出,整段漏掉</h4><p>規定好的格式與欄位,回答時自動省略</p></div><div class="unit-hd"><i></i></div></div>
+            </div>
+            <div class="sticker warn"><span class="bar"></span><p>問題不是 prompt 寫得不夠好 —— 是<b>遵從性有天花板</b>,規則得換一種寫法</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · 4 FAULTS LOGGED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P18 R06 · 數數題 ═══ -->
+<section class="page rk" id="p18" data-rid="R06" data-nav="r06">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R06</span>
+          <div class="rack-title"><span class="eyebrow">思維四 · 2/3</span><h2>把規則寫成「數數題」,不是「判斷題」</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 25.1°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u3">
+              <div class="unit" style="--i:0">
+                <div class="unit-side"><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content"><div style="font-family:var(--mono);font-size:1.7rem;font-weight:700;color:var(--green);text-shadow:0 0 .7rem rgba(61,220,151,.4)">1 次</div>
+                <h4 style="margin-top:.15rem">工具找不到?</h4><p>用精確名稱只搜一次,沒有就回報,不准換近義詞硬找</p></div>
+                <div class="unit-hd"><i></i></div>
+              </div>
+              <div class="unit" style="--i:1">
+                <div class="unit-side"><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content"><div style="font-family:var(--mono);font-size:1.7rem;font-weight:700;color:var(--green);text-shadow:0 0 .7rem rgba(61,220,151,.4)">2 輪</div>
+                <h4 style="margin-top:.15rem">查不出新東西?</h4><p>連續兩輪沒有新證據,立刻停止、輸出目前最佳答案</p></div>
+                <div class="unit-hd"><i></i></div>
+              </div>
+              <div class="unit" style="--i:2">
+                <div class="unit-side"><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content"><div style="font-family:var(--mono);font-size:1.7rem;font-weight:700;color:var(--green);text-shadow:0 0 .7rem rgba(61,220,151,.4)">6 態</div>
+                <h4 style="margin-top:.15rem">工具回了結果?</h4><p>先分六態:未執行/有料/零筆/部分/失敗/不支援。零筆 ≠ 正常,只能說「此條件查無」</p></div>
+                <div class="unit-hd"><i></i></div>
+              </div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p><b>Countable, not judgment calls</b> —— 小模型守得住「數到 2」,守不住「合理」<small>(本案實測,非通用定律)</small></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · COUNTABLE RULES</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P19 R06 · CASE03 ═══ -->
+<section class="page rk" id="p19" data-rid="R06" data-nav="r06">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R06</span>
+          <div class="rack-title"><span class="eyebrow">思維四 · 實戰 · 3/3</span><h2>實戰:AI 糾正了人類的記憶</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 25.1°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="console" style="--i:0">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-human">同</span><span class="name">同仁</span><span class="time">實際提問 · 06-08 14:01 GMT+8</span></div>
+                  <pre>4/24 A800 SiteB remote BAY 43 → BAY 25 接手
+4/27 A800 SiteA Bay 25 亮橘燈, 預防性更換
+5/11 A800 SiteB remote BAY 32 → BAY 43 接手
+6/8 A800 SiteA remote BAY 37 → BAY 47 接手
+是這樣嗎 幫我事實核實下
+
+<span class="dim">(同仁憑印象寫的整理,貼給 AI 求證)</span></pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#08</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+              <div class="console" style="--i:1">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">核實輸出 · 14:03 GMT+8(2 分 27 秒)</span></div>
+                  <pre>「我核對後,不是完全照你這 4 行寫法」
+├─ 4/24 <span class="warn">△ 部分不一致</span>:來源字面是
+│    SiteA SSD43 → SSD25,不是 SiteB
+├─ 4/27 <span class="hl">✓ 確認正確</span>(亮橘燈・預防性更換)
+├─ 5/11 <span class="err">✗ 無法確認</span> bay 32→43
+│    (Jira 只寫「一顆 disk」,無 bay 編號)
+└─ 6/8 <span class="warn">△ 監控僅支持</span>「Bay37 消失、Bay47 存在」
+     「接手」屬推論 → 需 ONTAP/EMS 確認
+――
+追問:「這是哪張單?」
+答:「這句不是來自單據,
+  是我從監控現況推出來的檢查結果」</pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#09</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
+            </div>
+            <div class="sticker cy"><span class="bar"></span><p>真實對話:<b>逐條標證據等級(✓/△/✗)、標明推論來源</b> —— 上一頁的零筆原則,實戰長這樣</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-B · CASE-03 ARCHIVED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P20 R07 守門 ═══ -->
+<section class="page rk" id="p20" data-rid="R07" data-nav="r07">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R07</span>
+          <div class="rack-title"><span class="eyebrow">RUNTIME GUARDRAIL</span><h2>把規則變成系統:三個槓桿 × Runtime 守門</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.9°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u3">
+              <div class="unit" style="--i:0">
+                <div class="unit-side"><i class="led c"></i><i class="led c"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <h4 style="color:var(--cyan);margin-bottom:.4rem">三個槓桿</h4>
+                  <ul class="guard-list lever">
+                    <li><b>修資料,不修 prompt</b><br><span>路徑寫對,行為自動正確</span></li>
+                    <li><b>runtime 強制 &gt; 環境收斂 &gt; prompt</b><br><span>下架陷阱工具,勝過十條禁令</span></li>
+                    <li><b>查詢寫成腳本、鎖參數</b><br><span>省 context;可獨立重跑,0 inference</span></li>
+                  </ul>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:1;border-color:rgba(240,113,111,.4)">
+                <div class="unit-side"><i class="led r"></i><i class="led r"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <h4 style="color:var(--red);margin-bottom:.4rem">不該進來的</h4>
+                  <ul class="guard-list guard-in">
+                    <li><b>非白名單的人和 bot</b><br><span>叫不動它</span></li>
+                    <li><b>危險工具不掛載</b><br><span>看不到就用不了</span></li>
+                    <li><b>讀內部資產的指令</b><br><span>執行層直接擋</span></li>
+                  </ul>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:2;border-color:rgba(61,220,151,.4)">
+                <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <h4 style="color:var(--green);margin-bottom:.4rem">不該出去的</h4>
+                  <ul class="guard-list guard-out">
+                    <li><b>secrets / prompt 原文</b><br><span>出站閘門整則攔下</span></li>
+                    <li><b>內部路徑</b><br><span>自動塗銷再送出</span></li>
+                    <li><b>發錯頻道</b><br><span>目的地寫死在工具裡</span></li>
+                  </ul>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>Prompt 引導選擇;Skill 定義流程;<b>runtime 保證不越界</b> —— 越往上,越不能靠模型自律</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · FIREWALL ACTIVE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P21 R08 閉環 ═══ -->
+<section class="page rk" id="p21" data-rid="R08" data-nav="r08">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R08</span>
+          <div class="rack-title"><span class="eyebrow">改善閉環 · 1/2</span><h2>用 AI 開發 AI:讓兩個模型互相審稿</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.2°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led g"></i><i class="led c"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label">REVIEW LOOP</div>
+                <div class="chain">
+                  <div class="stp">模型 A 提案</div><div class="arr">→</div>
+                  <div class="stp">模型 B 批判</div><div class="arr">→</div>
+                  <div class="stp" style="border-color:rgba(76,194,245,.45)">人:仲裁 + 查證</div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit-row u2">
+              <div class="unit" style="--i:1"><div class="unit-side"><i class="led a"></i></div><div class="unit-content"><h4>引文造假被抓</h4><p>一方引了文件某段落佐證 —— 另一方實際打開文件,那段不存在</p></div><div class="unit-hd"><i></i></div></div>
+              <div class="unit" style="--i:2"><div class="unit-side"><i class="led a"></i></div><div class="unit-content"><h4>推論寫成事實被抓</h4><p>「這兩個網段同一個 VLAN」—— 追查原始資料,其實是未驗證的推測</p></div><div class="unit-hd"><i></i></div></div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>閉環:<b>生產事故 → 留 trace → AI critic 抓失敗 → 人核實 → 修 skill/工具/guard → 回歸驗證</b><small>配套:否決方案要記錄、防下一輪繞回;上線前先讓另一個模型 dry-run</small></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · DUAL-MODEL REVIEW</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P22 R08 · 業界五想法 ═══ -->
+<section class="page rk" id="p22" data-rid="R08" data-nav="r08">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R08</span>
+          <div class="rack-title"><span class="eyebrow">AGENT 使用模式 · 2/2</span><h2>業界收斂中的五個想法,我們都用上了</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.2°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led c"></i><i class="led c"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="quote"><div class="q">「不在 context 裡的知識,對 agent 等於不存在」</div><div class="land">落地:SOP、黑話、判斷寫進 skill —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Anthropic Agent Skills · OpenAI Harness Engineering</span></div></div>
+                <div class="quote"><div class="q">「context 是有限資源,工具定義會吃光它」</div><div class="land">落地:工具 65→15 收斂、高頻查詢改腳本 —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Anthropic Code Execution with MCP</span></div></div>
+                <div class="quote"><div class="q">「規則要放在對的高度(right altitude)」</div><div class="land">落地:前沿留思考空間、實測失敗面才上硬規則 —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Anthropic Context Engineering</span></div></div>
+                <div class="quote"><div class="q">「寫的和審的要分開」</div><div class="land">落地:雙模型互審+人仲裁、上線前 dry-run —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Claude Code Best Practices · OpenAI CriticGPT</span></div></div>
+                <div class="quote"><div class="q">「inference 花在建 loop,不花在跑 loop」</div><div class="land">落地:agent 建工具,排程與人直接跑 —— <span style="font-family:var(--mono);font-size:.66rem;color:var(--dim)">Kelsey Hightower ZTA</span></div></div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · INDUSTRY SYNC</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P23 R09 時間帳 ═══ -->
+<section class="page rk" id="p23" data-rid="R09" data-nav="r09">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R09</span>
+          <div class="rack-title"><span class="eyebrow">參考工期 · 本案實測</span><h2>想自己蓋一隻?時間帳攤給你看</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 22.5°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="workorder">
+              <div class="wo-head"><span>WORK ORDER · 自建時間帳</span><span>WO-2026-0805</span></div>
+              <table>
+                <tr><th>共同步驟(不分模型路線)</th><th>實測時間</th></tr>
+                <tr><td>接上通訊軟體(gateway/harness)</td><td class="time">~1 天內</td></tr>
+                <tr><td>接一顆資料源 MCP(開源/官方)</td><td class="time">10–15 分</td></tr>
+                <tr><td>寫一顆 skill(含 tool 選用+輸出格式)</td><td class="time">15–20 分</td></tr>
+                <tr><td>告警轉送 flow(agent 讀頻道+bot)</td><td class="time">~1 小時</td></tr>
+                <tr><td>文件 RAG 首建(4c8G/GPU)</td><td class="time">4–5h / &lt;1h</td></tr>
+              </table>
+              <div class="route">
+                <h5>路線 A · 訂閱前沿 API <span class="stamp">推薦起步</span></h5>
+                <p>模型調適:<b>0</b> · 後續新增/調適 skill:<b>一次 1–2 小時內</b></p>
+              </div>
+              <div class="route">
+                <h5>路線 B · 地端開源權重</h5>
+                <p>選型+調適:<b>~1 天</b>(官方+社群已有最佳解)· skill 要 SOP 化:<b>1–2 天/顆</b></p>
+              </div>
+              <div class="wo-note">訣竅:先讓前沿模型照需求 run 一遍 —— 該開哪些 tool,跑一次就知道。</div>
+            </div>
+            <div class="sticker"><span class="bar"></span><p>系統本體是<b>小時級的工</b> —— 可以先走訂閱、之後換地端,系統資產原封不動;不需要 DGX Spark 也能開始</p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · BOM ATTACHED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P24 R10 參考 ═══ -->
+<section class="page rk" id="p24" data-rid="R10" data-nav="r10">
+  <div class="stage">
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R10</span>
+          <div class="rack-title"><span class="eyebrow">APPENDIX A1</span><h2>參考來源(均為公開文獻)</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 22.3°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit-row u2">
+              <div class="unit" style="--i:0">
+                <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <div class="unit-label">ANTHROPIC</div>
+                  <div class="refs">
+                    <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building Effective Agents(2024-12)</a>
+                    <a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank" rel="noopener">Writing Effective Tools for Agents(2025-09)</a>
+                    <a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank" rel="noopener">Equipping Agents: Agent Skills(2025-10)</a>
+                    <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Effective Context Engineering(2025-09)</a>
+                    <a href="https://www.anthropic.com/engineering/code-execution-with-mcp" target="_blank" rel="noopener">Code Execution with MCP(2025-11)</a>
+                    <a href="https://code.claude.com/docs/en/best-practices" target="_blank" rel="noopener">Claude Code Best Practices(2025-04)</a>
+                    <a href="https://www.anthropic.com/engineering/managed-agents" target="_blank" rel="noopener">Scaling Managed Agents(2026-04)</a>
+                    <a href="https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns" target="_blank" rel="noopener">Field Guide: Finding Your Unknowns(2026)</a>
+                  </div>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+              <div class="unit" style="--i:1">
+                <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
+                <div class="unit-content">
+                  <div class="unit-label">OPENAI · 業界</div>
+                  <div class="refs">
+                    <a href="https://openai.com/business/guides-and-resources/a-practical-guide-to-building-ai-agents/" target="_blank" rel="noopener">A Practical Guide to Building Agents(2025-04)</a>
+                    <a href="https://openai.com/index/why-language-models-hallucinate/" target="_blank" rel="noopener">Why Language Models Hallucinate(2025-09)</a>
+                    <a href="https://openai.com/index/finding-gpt4s-mistakes-with-gpt-4/" target="_blank" rel="noopener">CriticGPT: Finding GPT-4's Mistakes(2024-06)</a>
+                    <a href="https://developers.openai.com/cookbook/examples/gpt4-1_prompting_guide" target="_blank" rel="noopener">GPT-4.1 Prompting Guide(2025-04)</a>
+                    <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener">Harness Engineering(2026-02)</a>
+                    <a href="https://www.youtube.com/watch?v=A7WFt2JQ5sg" target="_blank" rel="noopener">Kelsey Hightower — Zero Token Architecture(PlatformCon 2026)</a>
+                    <a href="https://www.bnext.com.tw/article/91490/anthropic-engineer-blind-spot-prompt" target="_blank" rel="noopener">盲點四象限:bnext 91490(中文整理)</a>
+                  </div>
+                  <p class="note">本套設計由自家生產問題獨立推導;上列文獻顯示業界正往同一方向收斂。</p>
+                </div>
+                <div class="unit-hd"><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · DOCS SHELF</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P25 封底(大會版型) ═══ -->
+<section class="page" id="p25" data-rid="COVER">
+  <div class="stage cover">
+    <img class="abs logo" src="assets/oneconf-logo.png" alt="ONEConf">
+    <img class="abs mobius back" src="assets/mobius.png" alt="">
+    <div class="abs thank">
+      <h1>THANK YOU</h1>
+      <p>Dean Wang · Hyjay Infra</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const pages = [...document.querySelectorAll('.page')];
+// ?flat:跳過動畫(截圖/列印/低效能環境用);?goto=N 直接跳到第 N 頁
+const qs = new URLSearchParams(location.search);
+if (qs.has('flat')) {
+  document.documentElement.style.scrollBehavior = 'auto';
+  pages.forEach(p => p.classList.add('on'));
+}
+if (qs.has('goto')) {
+  const n = Math.max(1, Math.min(pages.length, parseInt(qs.get('goto'), 10) || 1));
+  setTimeout(() => pages[n-1].scrollIntoView({behavior:'auto'}), 250);
+}
+if (qs.has('only')) {
+  const n = Math.max(1, Math.min(pages.length, parseInt(qs.get('only'), 10) || 1));
+  document.body.style.scrollSnapType = 'none';
+  pages.forEach((p, i) => { if (i !== n-1) p.style.display = 'none'; });
+  pages[n-1].classList.add('on');
+}
+const pageno = document.getElementById('pageno');
+const prog = document.getElementById('progress');
+const nav = document.getElementById('topnav');
+const links = [...document.querySelectorAll('#navlinks a')];
+let cur = 0;
+
+// 頁碼 + 進度 + scrollspy
+const watcher = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (e.isIntersecting) {
+      cur = pages.indexOf(e.target);
+      const rid = e.target.dataset.rid || '';
+      pageno.innerHTML = String(cur+1).padStart(2,'0') + ' / ' + pages.length + (rid && rid !== 'COVER' ? ' · <b>' + rid + '</b>' : '');
+      prog.style.width = ((cur+1) / pages.length * 100) + '%';
+      const key = e.target.dataset.nav || '';
+      links.forEach(a => a.classList.toggle('active', a.dataset.key === key));
+    }
+  });
+}, {threshold:.55});
+pages.forEach(p => watcher.observe(p));
+
+// 機櫃上電(每次進入頁面重新上電 → 翻頁即轉場)
+const powerOn = new IntersectionObserver(es => {
+  es.forEach(e => e.target.classList.toggle('on', e.isIntersecting));
+}, {threshold:.35});
+pages.forEach(p => powerOn.observe(p));
+
+// 鍵盤翻頁
+function go(i){
+  i = Math.max(0, Math.min(pages.length-1, i));
+  pages[i].scrollIntoView({behavior:'smooth'});
+}
+addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(cur+1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(cur-1); }
+  else if (e.key === 'Home') { e.preventDefault(); go(0); }
+  else if (e.key === 'End') { e.preventDefault(); go(pages.length-1); }
+  else if (e.key === 'f' || e.key === 'F') {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  }
+});
+
+// 導覽列閒置自動隱藏(投影時不擋畫面)
+let idleTimer;
+function wake(){
+  nav.classList.remove('idle');
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => nav.classList.add('idle'), 2600);
+}
+addEventListener('mousemove', wake, {passive:true});
+addEventListener('touchstart', wake, {passive:true});
+wake();
+</script>
+</body>
+</html>
