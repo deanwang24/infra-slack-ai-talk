@@ -139,6 +139,7 @@ nav.idle{opacity:0;pointer-events:none}
 }
 .rail.r{border-left:1px solid rgba(0,0,0,.5);border-right:1px solid rgba(255,255,255,.03)}
 .units{flex:1;min-width:0;min-height:0;padding:.95rem .95rem;display:flex;flex-direction:column;gap:.65rem;justify-content:center;overflow-y:auto;scrollbar-width:thin}
+.units > *{flex-shrink:0}
 .rack-foot{
   flex:none;display:flex;align-items:center;gap:.5rem;padding:.42rem 1.4rem;
   border-top:1px solid var(--line);background:#111825;
@@ -405,14 +406,6 @@ tr:last-child td{border-bottom:none}
 .page.on .unit-side .led.g:first-child{animation-duration:2.8s;animation-delay:.9s}
 .page.on .unit-side .led.c{animation:act 4.4s steps(1) infinite;animation-delay:1.6s}
 @keyframes act{0%,84%{opacity:1}86%{opacity:.25}88%{opacity:1}92%{opacity:.3}94%,100%{opacity:1}}
-
-/* ════════ console 對接跳線 ════════ */
-.unit-row.link{position:relative}
-.patch{
-  position:absolute;left:50%;top:26%;transform:translateX(-50%);width:6.2rem;height:3rem;z-index:6;pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 48'%3E%3Cpath d='M8 7 C 32 42, 88 42, 112 7' fill='none' stroke='%23e08a3c' stroke-width='3.6' stroke-linecap='round'/%3E%3Crect x='2' y='2' width='12' height='9' rx='1.5' fill='%23cdd7e4'/%3E%3Crect x='106' y='2' width='12' height='9' rx='1.5' fill='%23cdd7e4'/%3E%3C/svg%3E") center/contain no-repeat;
-  filter:drop-shadow(0 .25rem .35rem rgba(0,0,0,.55));
-}
 
 /* ════════ 決策樹連接線 ════════ */
 .dt-root{margin:0 auto;text-align:center;font-size:1.06rem;font-weight:700;background:#0d141f;border:1px solid var(--line);border-radius:.45rem;padding:.55rem 1.6rem;width:max-content;max-width:100%}
@@ -816,7 +809,7 @@ tr:last-child td{border-bottom:none}
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit-row u2 link"><div class="patch" aria-hidden="true"></div>
+            <div class="unit-row u2">
               <div class="console" style="--i:0">
                 <div class="screen">
                   <div class="screen-bar"><span class="avatar av-bot">J</span><span class="name">Jarvis</span><span class="time">① 初始訊息 · 18:16:29</span></div>
@@ -1069,7 +1062,7 @@ fail_time=06-18 18:13:29</pre>
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit-row u2 link"><div class="patch" aria-hidden="true"></div>
+            <div class="unit-row u2">
               <div class="console" style="--i:0">
                 <div class="screen">
                   <div class="screen-bar"><span class="avatar av-human">值</span><span class="name">值班同仁</span><span class="time">① 提問原文 · 17:39 GMT+8</span></div>
@@ -1345,7 +1338,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit-row u2 link"><div class="patch" aria-hidden="true"></div>
+            <div class="unit-row u2">
               <div class="console" style="--i:0">
                 <div class="screen">
                   <div class="screen-bar"><span class="avatar av-human">同</span><span class="name">同仁</span><span class="time">實際提問 · 06-08 14:01 GMT+8</span></div>
@@ -1742,16 +1735,29 @@ function autofit(){
     else z = Math.max(.75, (avail * .98) / nat.h);
     if (z === 1) return;
     u.style.zoom = z;
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 10; i++) {
       const rect = u.getBoundingClientRect();
       const m = measure();
       if (m.h <= rect.height * .99 && m.w <= rect.width * 1.005) break;
-      z *= 0.93; u.style.zoom = z;
+      z *= 0.95; u.style.zoom = z;
     }
   });
 }
 autofit();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(autofit);
+if (qs.has('check')) setTimeout(() => {
+  const bad = [];
+  document.querySelectorAll('.page').forEach(pg => {
+    const u = pg.querySelector('.units');
+    if (!u || !u.children.length) return;
+    const rs = [...u.children].map(k => k.getBoundingClientRect());
+    const h = Math.max(...rs.map(r => r.bottom)) - Math.min(...rs.map(r => r.top));
+    const w = Math.max(...rs.map(r => r.right)) - Math.min(...rs.map(r => r.left));
+    const rect = u.getBoundingClientRect();
+    if (h > rect.height * 1.01 || w > rect.width * 1.02) bad.push(pg.id);
+  });
+  document.title = 'OVERFLOW:' + (bad.length ? bad.join(',') : 'none');
+}, 1200);
 
 let uT; addEventListener('resize', () => { clearTimeout(uT); uT = setTimeout(() => { buildU(); autofit(); }, 200); });
 
