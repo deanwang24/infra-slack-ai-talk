@@ -1756,6 +1756,16 @@ if (qs.has('check')) setTimeout(() => {
     const rect = u.getBoundingClientRect();
     if (h > rect.height * 1.01 || w > rect.width * 1.02) bad.push(pg.id);
   });
+  // 設備內部被 overflow:hidden 裁掉
+  document.querySelectorAll('.unit,.console').forEach(el => {
+    if (el.scrollHeight > el.clientHeight + 3 || el.scrollWidth > el.clientWidth + 3)
+      bad.push('clip@' + (el.closest('.page') || {}).id);
+  });
+  // 螢幕內文橫向/縱向切字
+  document.querySelectorAll('.screen pre').forEach(pre => {
+    if (pre.scrollWidth > pre.clientWidth + 3 || pre.scrollHeight > pre.clientHeight + 3)
+      bad.push('pre@' + (pre.closest('.page') || {}).id);
+  });
   document.title = 'OVERFLOW:' + (bad.length ? bad.join(',') : 'none');
 }, 1200);
 
