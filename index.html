@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Infra Slack AI 助理:從查詢 Flow 到 Agent 設計 — Dean Wang</title>
 <meta name="description" content="把 infra 團隊的排障直覺,工程化成 Slack 裡的 AI 助理。機房巡檢式投影報告:十座機櫃、四個思維、三組真實案例。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='2' width='24' height='28' rx='3' fill='%23131a26' stroke='%234cc2f5' stroke-width='2'/%3E%3Crect x='8' y='7' width='16' height='4' rx='1' fill='%231a2536'/%3E%3Crect x='8' y='14' width='16' height='4' rx='1' fill='%231a2536'/%3E%3Crect x='8' y='21' width='16' height='4' rx='1' fill='%231a2536'/%3E%3Ccircle cx='22.5' cy='9' r='1.4' fill='%233ddc97'/%3E%3Ccircle cx='22.5' cy='16' r='1.4' fill='%23f5c04a'/%3E%3Ccircle cx='22.5' cy='23' r='1.4' fill='%233ddc97'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Infra Slack AI 助理:從查詢 Flow 到 Agent 設計">
+<meta property="og:description" content="把 infra 團隊的排障直覺,工程化成 Slack 裡的 AI 助理。機房巡檢式投影報告:四個思維、三組真實案例。">
+<meta property="og:url" content="https://deanwang24.github.io/infra-slack-ai-talk/">
+<meta property="og:image" content="https://deanwang24.github.io/infra-slack-ai-talk/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
   --bg:#05080d;
@@ -34,7 +43,7 @@ body{
 ::selection{background:rgba(76,194,245,.28)}
 
 /* ════════ 頁面骨架:一頁 = 一張 16:9 投影片 ════════ */
-.page{height:100vh;height:100svh;scroll-snap-align:start;display:grid;place-items:center;overflow:hidden;position:relative}
+.page{height:100vh;height:100svh;scroll-snap-align:start;scroll-snap-stop:always;display:grid;place-items:center;overflow:hidden;position:relative}
 .stage{
   width:min(100vw,177.78vh);height:min(100vh,56.25vw);
   position:relative;display:flex;flex-direction:column;padding:1.9rem 2.3rem;
@@ -82,7 +91,7 @@ nav.idle{opacity:0;pointer-events:none}
 @keyframes blink{50%{opacity:.25}}
 
 /* ════════ 封面 / 封底(大會版型) ════════ */
-.stage.cover{padding:0;overflow:hidden;background:url(assets/cover-bg.png) center/cover no-repeat #0a1430}
+.stage.cover{padding:0;overflow:hidden;background:url(assets/cover-bg.webp) center/cover no-repeat #0a1430}
 .cover .abs{position:absolute}
 .cover .logo{left:5.5%;top:8%;width:18.5%}
 .cover .mobius{left:54.5%;top:17.8%;width:47.5%}
@@ -421,7 +430,7 @@ tr:last-child td{border-bottom:none}
 .dt-col{border:1px solid var(--line);border-radius:.45rem;padding:.8rem 1rem;background:#0d141f}
 .dt-col .cond{font-size:.85rem;color:var(--muted)}
 .dt-col .who{font-size:1.18rem;font-weight:700;margin:.1rem 0}
-.dt-col .how{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+.dt-col .how{font-family:var(--mono);font-size:.72rem;color:#8fa2bf}
 .dt-col.c1 .who{color:var(--green)}
 .dt-col.c2 .who{color:var(--cyan)}
 .dt-col.c3 .who{color:var(--amber)}
@@ -458,14 +467,15 @@ tr:last-child td{border-bottom:none}
 .lg .screen pre{font-size:.88rem;line-height:1.7}
 .lg .screen-bar{font-size:.78rem}
 
-/* ════════ 動畫弱化偏好 ════════ */
+/* ════════ 動畫弱化:?flat 與 prefers-reduced-motion 共用 ════════ */
+html.flat *,html.flat *::before,html.flat *::after{animation:none!important;transition:none!important}
+html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transparent 62%, rgba(0,0,0,.42) 100%)}
 @media (prefers-reduced-motion:reduce){
-  .chain .arr::before,.page.on .fan::before,.led,.unit-side .led{animation:none!important}
-  .unit,.console,.plate,.sticker,.workorder,.rack{transition:none}
+  *,*::before,*::after{animation:none!important;transition:none!important}
 }
 
 /* ════════ 直式手機 fallback ════════ */
-@media (orientation:portrait) and (max-width:840px){
+@media (max-aspect-ratio: 1/1){
   html{font-size:13px}
   body{scroll-snap-type:none}
   .page{height:auto;min-height:100svh}
@@ -473,7 +483,9 @@ tr:last-child td{border-bottom:none}
   .stage.cover{min-height:100svh;padding:0}
   .u2,.u3,.u4,.readout-row{grid-template-columns:1fr}
   .chain{flex-direction:column}
-  .chain .arr{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+  .chain .arr{flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:.15rem 0}
+  .chain .arr::before{flex:none;width:2px;height:1.1rem;background:repeating-linear-gradient(180deg,rgba(76,194,245,.9) 0 .45rem,transparent .45rem .9rem)}
+  .chain .arr::after{border-left:.3rem solid transparent;border-right:.3rem solid transparent;border-top:.44rem solid var(--cyan);border-bottom:none}
   .rack-title h2{white-space:normal;font-size:1.15rem}
   .rack-tele{display:none}
   .rail{width:.6rem}
@@ -514,7 +526,7 @@ tr:last-child td{border-bottom:none}
 <section class="page" id="p01" data-rid="COVER">
   <div class="stage cover">
     <img class="abs logo" src="assets/oneconf-logo.png" alt="ONEConf">
-    <img class="abs mobius" src="assets/mobius.png" alt="">
+    <img class="abs mobius" src="assets/mobius.webp" alt="">
     <div class="abs title">
       <h1>Infra Slack AI 助理<span class="sub">從查詢 Flow 到 Agent 設計</span></h1>
     </div>
@@ -928,7 +940,7 @@ fail_time=06-18 18:13:29</pre>
             <div class="unit slim" style="--i:3"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">③</span><span class="body">裁決不看絕對值:headroom ratio &lt; 1 →「無真正效能影響」—— 即使 latency 漲 2–3 倍;ratio ≥ 1 才是真 bottleneck</span></div><div class="unit-hd"><i></i></div></div>
             <div class="unit slim" style="--i:4"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">④</span><span class="body">延遲異常的 volume 是誰在用:volume/LUN 命名 → 對應到某台 DB(名稱遮蔽)</span></div><div class="unit-hd"><i></i></div></div>
             <div class="unit slim" style="--i:5"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">⑤</span><span class="body">該 DB 的角色(主庫/從庫/報表)→ 推導受影響的服務與嚴重度</span></div><div class="unit-hd"><i></i></div></div>
-            <div class="unit slim" style="--i:6"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body">→ 通知帶出去的是「<b>影響面</b>」,不只是「壞了一顆碟」<br><span style="font-size:.72rem;color:var(--dim)">※ 前兩頁的真實事件沒有走到 ④⑤:busy 0.2%、headroom 健康,②③ 就收斂了 —— 但這條路一直都在 skill 裡,延遲一旦異常就會往下追</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:6"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body">→ 通知帶出去的是「<b>影響面</b>」,不只是「壞了一顆碟」<br><span style="font-size:.72rem;color:#8fa2bf">※ 前兩頁的真實事件沒有走到 ④⑤:busy 0.2%、headroom 健康,②③ 就收斂了 —— 但這條路一直都在 skill 裡,延遲一旦異常就會往下追</span></span></div><div class="unit-hd"><i></i></div></div>
             <div class="sticker"><span class="bar"></span><p>每一步的輸出就是下一步的車票:<b>aggregate → volume → 使用者 → 角色 → 影響面</b></p></div>
           </div>
           <div class="rail r"></div>
@@ -1081,7 +1093,7 @@ Managed Rule ID: 6e3c••••</pre>
               </div>
               <div class="console" style="--i:1">
                 <div class="screen">
-                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 完整報告 · 17:49(10 分 19 秒)節錄上:CF edge</span></div>
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 完整報告 · 17:49(10 分 19 秒) · 節錄上:CF edge</span></div>
                   <pre>結論:<span class="hl">mitigated-clean</span> —— CF L7DDoS managed
 rule 自動攔截,origin 完全未受影響。
 CF edge 攔截量(1h 窗口):
@@ -1168,25 +1180,41 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="console" style="--i:0;width:100%;max-width:80rem;margin:0 auto">
-              <div class="screen">
-                <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">同一則報告 節錄下:ES origin 穿透 × backend 健康(原文照登)</span></div>
-                <pre>Origin 穿透量(ES 逐分鐘):              Origin 健康(backend:klt•••_32082):
-16:09   23,074                          Tr avg 2.6ms(max 10,017ms 孤立 outlier)
-16:10  102,882                          5xx = 0(峰值分鐘 16:11 亦為 0)
-16:11  <span class="hl">265,368 ← PEAK ≈ 4,423 rps</span>       server-side termination(sH/sD/sC)= 0
-16:12   66,021                          client-side CR/CD = 24(客戶端斷線)
-16:13   74,641 ← 告警時間點             → <span class="hl">攻擊期間後端完全健康,無 down window</span>
+            <div class="unit-row u2">
+              <div class="console" style="--i:0">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">同一則報告 節錄下 A:ES origin 穿透(原文照登)</span></div>
+                  <pre>Origin 穿透量(ES 逐分鐘):
+16:09   23,074
+16:10  102,882
+16:11  <span class="hl">265,368 ← PEAK ≈ 4,423 rps</span>
+16:12   66,021
+16:13   74,641 ← 告警時間點
 16:14   82,541
-16:15    9,155                          Origin per-CDN:攻擊 100% 走 CF,
-總穿透 624,565(sanity check 通過)       無其他 CDN 路徑
-
-建議(節錄):後端完全無影響,不需任何緊急操作;firewallCustom 考慮改 block;
-對 /api/•••/GetSiteConfigs 加更嚴格 rate limit</pre>
+16:15    9,155
+總穿透 624,565(sanity check 通過)</pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#07</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
-              <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#07</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              <div class="console" style="--i:1">
+                <div class="screen">
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">節錄下 B:backend 健康 × 建議(原文照登)</span></div>
+                  <pre>Origin 健康(backend:klt•••_32082):
+Tr avg 2.6ms(max 10,017ms 孤立 outlier)
+5xx = 0(峰值分鐘 16:11 亦為 0)
+server-side termination(sH/sD/sC)= 0
+client-side CR/CD = 24(客戶端斷線)
+→ <span class="hl">攻擊期間後端完全健康,無 down window</span>
+Origin per-CDN:攻擊 100% 走 CF,無其他 CDN 路徑
+
+建議(節錄):後端完全無影響,不需任何緊急操作;
+firewallCustom 考慮改 block;
+對 /api/•••/GetSiteConfigs 加更嚴格 rate limit</pre>
+                </div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#08</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+              </div>
             </div>
-            <div class="sticker"><span class="bar"></span><p>CF 看「擋了多少」→ ES 看「漏了多少」→ backend 看「傷了沒」—— <b>一則報告三層閉環;跑在地端 35B 上</b></p></div>
+            <div class="sticker"><span class="bar"></span><p>CF 看「擋了多少」→ ES 看「漏了多少」→ backend 看「傷了沒」—— <b>一則報告三層閉環;跑在地端 35B 上(事件當時)</b></p></div>
           </div>
           <div class="rail r"></div>
         </div>
@@ -1347,7 +1375,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 
 <span class="dim">(同仁憑印象寫的整理,貼給 AI 求證)</span></pre>
                 </div>
-                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#08</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#09</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
               <div class="console" style="--i:1">
                 <div class="screen">
@@ -1365,7 +1393,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 答:「這句不是來自單據,
   是我從監控現況推出來的檢查結果」</pre>
                 </div>
-                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#09</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
+                <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#10</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
             </div>
             <div class="sticker cy"><span class="bar"></span><p>真實對話:<b>逐條標證據等級(✓/△/✗)、標明推論來源</b> —— 上一頁的零筆原則,實戰長這樣</p></div>
@@ -1448,7 +1476,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R08</span>
-          <div class="rack-title"><span class="eyebrow">改善閉環 · 1/2</span><h2>用 AI 開發 AI:讓兩個模型互相審稿</h2></div>
+          <div class="rack-title"><span class="eyebrow">改善閉環</span><h2>用 AI 開發 AI:讓兩個模型互相審稿</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.2°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1488,7 +1516,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R08</span>
-          <div class="rack-title"><span class="eyebrow">AGENT 使用模式 · 2/2</span><h2>業界收斂中的五個想法,我們都用上了</h2></div>
+          <div class="rack-title"><span class="eyebrow">AGENT 使用模式</span><h2>業界收斂中的五個想法,我們都用上了</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.2°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1497,11 +1525,11 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
             <div class="unit" style="--i:0">
               <div class="unit-side"><i class="led c"></i><i class="led c"></i><div class="vent"></div></div>
               <div class="unit-content">
-                <div class="quote"><div class="q">「不在 context 裡的知識,對 agent 等於不存在」</div><div class="land">落地:SOP、黑話、判斷寫進 skill —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Anthropic Agent Skills · OpenAI Harness Engineering</span></div></div>
-                <div class="quote"><div class="q">「context 是有限資源,工具定義會吃光它」</div><div class="land">落地:工具 65→15 收斂、高頻查詢改腳本 —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Anthropic Code Execution with MCP</span></div></div>
-                <div class="quote"><div class="q">「規則要放在對的高度(right altitude)」</div><div class="land">落地:前沿留思考空間、實測失敗面才上硬規則 —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Anthropic Context Engineering</span></div></div>
-                <div class="quote"><div class="q">「寫的和審的要分開」</div><div class="land">落地:雙模型互審+人仲裁、上線前 dry-run —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Claude Code Best Practices · OpenAI CriticGPT</span></div></div>
-                <div class="quote"><div class="q">「inference 花在建 loop,不花在跑 loop」</div><div class="land">落地:agent 建工具,排程與人直接跑 —— <span style="font-family:var(--mono);font-size:.74rem;color:var(--dim)">Kelsey Hightower ZTA</span></div></div>
+                <div class="quote"><div class="q">「不在 context 裡的知識,對 agent 等於不存在」</div><div class="land">落地:SOP、黑話、判斷寫進 skill —— <span style="font-family:var(--mono);font-size:.74rem;color:#8fa2bf">Anthropic Agent Skills · OpenAI Harness Engineering</span></div></div>
+                <div class="quote"><div class="q">「context 是有限資源,工具定義會吃光它」</div><div class="land">落地:工具 65→15 收斂、高頻查詢改腳本 —— <span style="font-family:var(--mono);font-size:.74rem;color:#8fa2bf">Anthropic Code Execution with MCP</span></div></div>
+                <div class="quote"><div class="q">「規則要放在對的高度(right altitude)」</div><div class="land">落地:前沿留思考空間、實測失敗面才上硬規則 —— <span style="font-family:var(--mono);font-size:.74rem;color:#8fa2bf">Anthropic Context Engineering</span></div></div>
+                <div class="quote"><div class="q">「寫的和審的要分開」</div><div class="land">落地:雙模型互審+人仲裁、上線前 dry-run —— <span style="font-family:var(--mono);font-size:.74rem;color:#8fa2bf">Claude Code Best Practices · OpenAI CriticGPT</span></div></div>
+                <div class="quote"><div class="q">「inference 花在建 loop,不花在跑 loop」</div><div class="land">落地:agent 建工具,排程與人直接跑 —— <span style="font-family:var(--mono);font-size:.74rem;color:#8fa2bf">Kelsey Hightower ZTA</span></div></div>
               </div>
               <div class="unit-hd"><i></i><i></i></div>
             </div>
@@ -1621,7 +1649,7 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 <section class="page" id="p25" data-rid="COVER">
   <div class="stage cover">
     <img class="abs logo" src="assets/oneconf-logo.png" alt="ONEConf">
-    <img class="abs mobius back" src="assets/mobius.png" alt="">
+    <img class="abs mobius back" src="assets/mobius.webp" alt="">
     <div class="abs thank">
       <h1>THANK YOU</h1>
       <p>Dean Wang · Hyjay Infra</p>
@@ -1631,15 +1659,18 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 
 <script>
 const pages = [...document.querySelectorAll('.page')];
-// ?flat:跳過動畫(截圖/列印/低效能環境用);?goto=N 直接跳到第 N 頁
+// ?flat:關閉全部動畫(截圖/低效能環境用);?goto=N 直接跳到第 N 頁
 const qs = new URLSearchParams(location.search);
-if (qs.has('flat')) {
+const FLAT = qs.has('flat');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (FLAT) {
+  document.documentElement.classList.add('flat');
   document.documentElement.style.scrollBehavior = 'auto';
   pages.forEach(p => p.classList.add('on'));
 }
 if (qs.has('goto')) {
   const n = Math.max(1, Math.min(pages.length, parseInt(qs.get('goto'), 10) || 1));
-  setTimeout(() => pages[n-1].scrollIntoView({behavior:'auto'}), 250);
+  setTimeout(() => { go(n-1); }, 250);
 }
 if (qs.has('only')) {
   const n = Math.max(1, Math.min(pages.length, parseInt(qs.get('only'), 10) || 1));
@@ -1663,6 +1694,7 @@ const watcher = new IntersectionObserver(es => {
       prog.style.width = ((cur+1) / pages.length * 100) + '%';
       const key = e.target.dataset.nav || '';
       links.forEach(a => a.classList.toggle('active', a.dataset.key === key));
+      if (!navScrolling) want = cur;
     }
   });
 }, {threshold:.55});
@@ -1763,21 +1795,53 @@ if (qs.has('check')) setTimeout(() => {
     if (pre.scrollWidth > pre.clientWidth + 3 || pre.scrollHeight > pre.clientHeight + 3)
       bad.push('pre@' + (pre.closest('.page') || {}).id);
   });
+  // 整頁絕對寬度(涵蓋封面與「整條鏈一起撐寬」的漏網)
+  if (document.body.scrollWidth > window.innerWidth + 2) {
+    let worst = null, worstR = window.innerWidth + 2;
+    document.querySelectorAll('.page *').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.right > worstR) { worstR = r.right; worst = el; }
+    });
+    bad.push('body-x' + (worst ? ':' + (worst.className && worst.className.split ? worst.className.split(' ')[0] : worst.tagName) + '@' + ((worst.closest('.page') || {}).id || '?') : ''));
+  }
   document.title = 'OVERFLOW:' + (bad.length ? bad.join(',') : 'none');
 }, 1200);
 
 let uT; addEventListener('resize', () => { clearTimeout(uT); uT = setTimeout(() => { buildU(); autofit(); }, 200); });
 
-// 鍵盤翻頁
-function go(i){
-  i = Math.max(0, Math.min(pages.length-1, i));
-  pages[i].scrollIntoView({behavior:'smooth'});
+// 鍵盤/導覽翻頁:want 狀態機(連按不吃舊值);跳頁期間暫停 snap,避免 snap-stop 夾住多頁跳轉
+let want = 0, navScrolling = false, navTimer = null, settleTimer = null;
+function endNav(){
+  clearTimeout(navTimer);
+  document.body.style.scrollSnapType = '';
+  navScrolling = false;
 }
+function go(i){
+  want = Math.max(0, Math.min(pages.length - 1, i));
+  navScrolling = true;
+  document.body.style.scrollSnapType = 'none';
+  clearTimeout(navTimer);
+  navTimer = setTimeout(endNav, 1400);
+  pages[want].scrollIntoView({behavior: (FLAT || REDUCED) ? 'auto' : 'smooth'});
+}
+addEventListener('scroll', () => {
+  if (!navScrolling) return;
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(endNav, 160);
+}, {passive:true});
+// 站內錨點(導覽列/平面圖)一律走 go(),不走瀏覽器原生跳轉
+document.querySelectorAll('a[href^="#p"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.getElementById(a.getAttribute('href').slice(1));
+    const i = pages.indexOf(t);
+    if (i >= 0) { e.preventDefault(); go(i); }
+  });
+});
 addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(cur+1); }
-  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(cur-1); }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); go(want + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); go(want - 1); }
   else if (e.key === 'Home') { e.preventDefault(); go(0); }
-  else if (e.key === 'End') { e.preventDefault(); go(pages.length-1); }
+  else if (e.key === 'End') { e.preventDefault(); go(pages.length - 1); }
   else if (e.key === 'f' || e.key === 'F') {
     document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
   }
