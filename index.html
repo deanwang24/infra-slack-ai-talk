@@ -827,7 +827,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
             <div class="unit-row u2">
               <div class="console" style="--i:0">
                 <div class="screen">
-                  <div class="screen-bar"><span class="avatar av-bot">J</span><span class="name">Jarvis</span><span class="time">① 初始訊息 · 18:16:29</span></div>
+                  <div class="screen-bar"><span class="avatar av-bot">J</span><span class="name">Jarvis</span><span class="time">① 初始訊息 · 00:28:02</span></div>
                   <pre>[TRIAGE:netapp-disk]
 skill=hyjay-nabox-storage
 cluster=A800_Site*
@@ -835,36 +835,36 @@ node=A800_Site*-01
 event=raid.config.filesystem
       .disk.failed
 severity=<span class="err">error</span>
-serial=44L0A•••TZ1H bay=43
+serial=44L0A•••TZ1H bay=31
 model=X4010KCM7V1T9NTE
-site=Remote
+site=Local
 failure_reason=<span class="err">disk failed</span>
-fail_time=06-18 18:13:29</pre>
+fail_time=08-15 00:25:01</pre>
                 </div>
                 <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#02</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
               <div class="console" style="--i:1">
                 <div class="screen">
-                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 首次回覆 · 18:20:40(+4 分 11 秒)</span></div>
-                  <pre>已複查並發到 #hyjay-••。
-事實:
-- relay 指向壞碟:SN 44L0A•••TZ1H /
-  bay 43 / A800_SiteA-01
-- nabox probe 已解析到 disk:1.0.43
-- <span class="hl">實體位置:SiteB / 3F-B07 14U / bay 43</span>
-- 我已重試 probe 到 18:20 GMT+8,目前
-  nabox 尚未抓到 failure edge /
-  takeover spare;<span class="warn">已在通知內標明
-  「Harvest/scrape 延遲,需 ONTAP CLI
-  交叉確認」</span>
-發送結果:
-- target: slack:C09B•••••
-- ts/message_id: 1781778032.0•••</pre>
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 查證+通知完成 · 00:31:44(+3 分 42 秒)</span></div>
+                  <pre>Jarvis,已確認並通知完畢。
+摘要:
+- 碟況: disk 2.0.31(bay 31,
+  SiteA 3F-B08 14U),owner
+  A800_SiteB-01。失效時間 00:25,
+  <span class="hl">重建在 00:28 完成,冗餘已恢復</span>。
+  <span class="warn">壞碟仍在架上,待實體更換</span>。
+- 影響評估: <span class="hl">該時窗全 cluster
+  volume 延遲峰值 0.52 ms,
+  volume 層無業務影響</span>。
+- 通知: 已送至 #hyjay-••
+  (delivered=true)
+下一步是實體換碟,換完後再跑
+postswap 驗證。</pre>
                 </div>
                 <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#03</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
             </div>
-            <div class="sticker cy"><span class="bar"></span><p>訊息原文照登(僅遮罩序號與頻道)—— <b>4 分 11 秒定位到機櫃層</b>;抓不到的照實標,通知照發</p></div>
+            <div class="sticker cy"><span class="bar"></span><p>訊息原文照登(僅遮罩序號與頻道)—— <b>3 分 42 秒:查證、重建確認、影響評估、通知送達,一次完成</b></p></div>
           </div>
           <div class="rail r"></div>
         </div>
@@ -882,7 +882,7 @@ fail_time=06-18 18:13:29</pre>
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · 實戰 · 5/6</span><h2>實戰:一顆壞碟(2/2)——「再檢查一次」</h2></div>
+          <div class="rack-title"><span class="eyebrow">思維一 · 實戰 · 5/6</span><h2>實戰:一顆壞碟(2/2)——「換好了」之後</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -890,30 +890,33 @@ fail_time=06-18 18:13:29</pre>
           <div class="units">
             <div class="console" style="--i:0;width:100%;max-width:80rem;margin:0 auto">
               <div class="screen">
-                <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">③ 22:42 值班同仁:「再檢查一次」→ 79 秒後完整回覆(原文照登)</span></div>
-                <pre>再檢查結果:SN 44L0A•••TZ1H / bay43 目前已是 <span class="hl">③ 已換碟/已恢復</span>。
-📅 2026-06-18 NetApp 壞碟 → 換碟上線 (GMT+8)
-│ 💽 disk 1.0.43 · 舊 SN 44L0A•••TZ1H → 新 SN S6H0N•••0239
-│ 💽 新碟 model X4010S173A1T9NTE
-│ 👤 current owner A800_SiteA-02 · cluster A800_SiteA
-│ 📍 實體 SiteB · 機櫃 3F-B07 14U · bay 43
-├── [18:13] relay/EMS 回報壞碟
-│    └── ⚠️ raid.config.filesystem.disk.failed / disk failed
-├── [18:15–19:45] disk_new_status series 中斷
-│    └── 🕒 Prometheus 上 1.0.43 在 18:15 後掉出,19:45 後重新出現
-└── [22:42] 目前狀態
-     ├── ✅ disk 1.0.43 已 online:disk_new_status=1
-     ├── ✅ container_type=shared / shared=true / failed=false
-     ├── ✅ aggr_disk_max_busy_now=0.2%,目前無重建 busy
-     └── 🕒 takeover spare 仍未由 nabox probe 解析出來
-判斷:
-- 現場 bay43 已有新碟上線並完成 ADP shared 狀態。
-- 目前沒有 rebuild active 跡象。
-- 「待確認頂上 spare」仍是限制:nabox probe 沒有列出 takeovers;需 ONTAP CLI
-  storage aggregate show-status 交叉確認。</pre>
+                <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">③ 01:57 值班同仁:「31 現在已經換一顆新的了 資訊給下」→ 1 分 56 秒 postswap(節錄)</span></div>
+                <pre>postswap 結果如下:〔ref:44L0A•••TZ1H〕
+📅 2026-08-15 NetApp 壞碟 → 重建 → 換碟上線 (GMT+8)
+💿 disk 2.0.31 · SN 44L0A•••TZ1H → S492N•••3079 · X4010KCM7V1T9NTE → X4010S172B1T9NTE
+👤 owner A800_SiteB-01 / A800_SiteB
+📍 實體位置 SiteA · 機櫃 3F-B08 14U · bay 31
+🔁 <span class="hl">頂上 spare 2.0.33.P3 / 2.0.42.P1 / 2.0.42.P2</span>
+├── [00:25] 階段一:磁碟失效 + 自動重建啟動
+│    ├── ⚠️ 失效錨點:relay fail_time (nabox edge missing)
+│    ├── 🔧 重建到 spare:2.0.31.P3 → 2.0.33.P3 / 2.0.31.P1 → 2.0.42.P1 / 2.0.31.P2 → 2.0.42.P2
+│    └── 📊 重建寫入約 28.8 GB
+├── [00:36] 階段二:重建完成、冗餘恢復
+│    └── ✅ rebuild 結束
+├── [pending] 階段三:原 bay 換碟 / slot 恢復
+│    └── 🧊 新碟 online / ADP 整合:pending
+└── 目前狀態
+     ├── ✅ disk 2.0.31 現在 container_type=remote、shared=false、failed=false
+     └── ✅ 目前 failed disk count = 0
+判定:verified / found
+重點:
+- <span class="hl">實體已換</span> —— serial 從 44L0A•••TZ1H 變成 S492N•••3079,型號也更新
+- <span class="warn">但新碟尚未整合進 ADP pool</span> —— container_type=remote、shared=false
+- 需確認:是否已執行 storage disk modify -disk 2.0.31 -container-type shared</pre>
               </div>
               <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#04</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
             </div>
+            <div class="sticker cy"><span class="bar"></span><p><b>1 分 56 秒完成 postswap 驗證</b> —— 還抓到人沒注意的:新碟已換,但尚未加入 shared pool,並附上確認指令</p></div>
           </div>
           <div class="rail r"></div>
         </div>
@@ -943,7 +946,7 @@ fail_time=06-18 18:13:29</pre>
             <div class="unit slim" style="--i:3"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">③</span><span class="body">裁決不看絕對值:headroom ratio &lt; 1 →「無真正效能影響」—— 即使 latency 漲 2–3 倍;ratio ≥ 1 才是真 bottleneck</span></div><div class="unit-hd"><i></i></div></div>
             <div class="unit slim" style="--i:4"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">④</span><span class="body">延遲異常的 volume 是誰在用:volume/LUN 命名 → 對應到某台 DB(名稱遮蔽)</span></div><div class="unit-hd"><i></i></div></div>
             <div class="unit slim" style="--i:5"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">⑤</span><span class="body">該 DB 的角色(主庫/從庫/報表)→ 推導受影響的服務與嚴重度</span></div><div class="unit-hd"><i></i></div></div>
-            <div class="unit slim" style="--i:6"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body">→ 通知帶出去的是「<b>影響面</b>」,不只是「壞了一顆碟」<br><span style="font-size:.72rem;color:#8fa2bf">※ 前兩頁的真實事件沒有走到 ④⑤:busy 0.2%、headroom 健康,②③ 就收斂了 —— 但這條路一直都在 skill 裡,延遲一旦異常就會往下追</span></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="unit slim" style="--i:6"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body">→ 通知帶出去的是「<b>影響面</b>」,不只是「壞了一顆碟」<br><span style="font-size:.72rem;color:#8fa2bf">※ 前兩頁的真實事件實際跑到了影響評估:全 cluster volume 延遲峰值 0.52 ms → 判定無業務影響;延遲一旦異常,④⑤ 就會繼續往下追</span></span></div><div class="unit-hd"><i></i></div></div>
             <div class="sticker"><span class="bar"></span><p>每一步的輸出就是下一步的車票:<b>aggregate → volume → 使用者 → 角色 → 影響面</b></p></div>
           </div>
           <div class="rail r"></div>
