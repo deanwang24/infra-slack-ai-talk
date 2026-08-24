@@ -513,7 +513,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
       <a href="#p16" data-key="r05"><b>R05</b>思維三</a>
       <a href="#p17" data-key="r06"><b>R06</b>思維四</a>
       <a href="#p20" data-key="r07"><b>R07</b>守門</a>
-      <a href="#p21" data-key="r08"><b>R08</b>閉環</a>
+      <a href="#p22" data-key="r08"><b>R08</b>業界</a>
       <a href="#p23" data-key="r09"><b>R09</b>時間帳</a>
       <a href="#p24" data-key="r10"><b>R10</b>參考</a>
     </div>
@@ -585,7 +585,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
                   <a class="mini-rack" href="#p16" data-name="R05 · 思維三"><span class="mled"></span><u></u><u></u><span class="rid">R05</span></a>
                   <a class="mini-rack" href="#p17" data-name="R06 · 思維四 + 糾錯實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R06</span></a>
                   <a class="mini-rack" href="#p20" data-name="R07 · Runtime 守門"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R07</span></a>
-                  <a class="mini-rack" href="#p21" data-name="R08 · 改善閉環"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R08</span></a>
+                  <a class="mini-rack" href="#p22" data-name="R08 · 業界五想法"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R08</span></a>
                   <a class="mini-rack" href="#p23" data-name="R09 · 時間帳"><span class="mled"></span><u></u><u></u><span class="rid">R09</span></a>
                   <a class="mini-rack" href="#p24" data-name="R10 · 參考來源"><span class="mled"></span><u></u><u></u><span class="rid">R10</span></a>
                 </div>
@@ -1463,46 +1463,6 @@ firewallCustom 考慮改 block;
           <div class="rail r"></div>
         </div>
         <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · FIREWALL ACTIVE</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ P21 R08 閉環 ═══ -->
-<section class="page rk lg" id="p21" data-rid="R08" data-nav="r08">
-  <div class="stage">
-    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
-    <div class="rack">
-      <div class="rack-frame">
-        <div class="rack-head">
-          <span class="rack-id">R08</span>
-          <div class="rack-title"><span class="eyebrow">改善閉環</span><h2>用 AI 開發 AI:讓兩個模型互相審稿</h2></div>
-          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.2°C&nbsp; FAN <span class="fan"></span></div>
-        </div>
-        <div class="rack-body">
-          <div class="rail"></div>
-          <div class="units">
-            <div class="unit" style="--i:0">
-              <div class="unit-side"><i class="led g"></i><i class="led c"></i><div class="vent"></div></div>
-              <div class="unit-content">
-                <div class="unit-label">REVIEW LOOP</div>
-                <div class="chain">
-                  <div class="stp">模型 A 提案</div><div class="arr"></div>
-                  <div class="stp">模型 B 批判</div><div class="arr"></div>
-                  <div class="stp" style="border-color:rgba(76,194,245,.45)">人:仲裁 + 查證</div>
-                </div>
-              </div>
-              <div class="unit-hd"><i></i><i></i></div>
-            </div>
-            <div class="unit-row u2">
-              <div class="unit" style="--i:1"><div class="unit-side"><i class="led a"></i></div><div class="unit-content"><h4>引文造假被抓</h4><p>一方引了文件某段落佐證 —— 另一方實際打開文件,那段不存在</p></div><div class="unit-hd"><i></i></div></div>
-              <div class="unit" style="--i:2"><div class="unit-side"><i class="led a"></i></div><div class="unit-content"><h4>推論寫成事實被抓</h4><p>「這兩個網段同一個 VLAN」—— 追查原始資料,其實是未驗證的推測</p></div><div class="unit-hd"><i></i></div></div>
-            </div>
-            <div class="sticker"><span class="bar"></span><p>閉環:<b>生產事故 → 留 trace → AI critic 抓失敗 → 人核實 → 修 skill/工具/guard → 回歸驗證</b><small>配套:否決方案要記錄、防下一輪繞回;上線前先讓另一個模型 dry-run</small></p></div>
-          </div>
-          <div class="rail r"></div>
-        </div>
-        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-C · DUAL-MODEL REVIEW</div>
       </div>
     </div>
   </div>
