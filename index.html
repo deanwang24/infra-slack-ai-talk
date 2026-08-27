@@ -591,7 +591,6 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
       <a href="#p05" data-key="r03"><b>R03</b>思維一</a>
       <a href="#p11" data-key="r04"><b>R04</b>思維二</a>
       <a href="#p16" data-key="r05"><b>R05</b>思維三</a>
-      <a href="#p17" data-key="r06"><b>R06</b>思維四+守門</a>
       <a href="#p22" data-key="r08"><b>R08</b>業界</a>
       <a href="#p23" data-key="r09"><b>R09</b>時間帳</a>
       <a href="#p24" data-key="r10"><b>R10</b>參考</a>
@@ -662,7 +661,6 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
                   <a class="mini-rack" href="#p05" data-name="R03 · 思維一 + 壞碟實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R03</span></a>
                   <a class="mini-rack" href="#p11" data-name="R04 · 思維二 + DDoS 實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R04</span></a>
                   <a class="mini-rack" href="#p16" data-name="R05 · 思維三"><span class="mled"></span><u></u><u></u><span class="rid">R05</span></a>
-                  <a class="mini-rack" href="#p17" data-name="R06 · 思維四 + Runtime 守門"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R06</span></a>
                   <a class="mini-rack" href="#p22" data-name="R08 · 業界五想法"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R08</span></a>
                   <a class="mini-rack" href="#p23" data-name="R09 · 時間帳"><span class="mled"></span><u></u><u></u><span class="rid">R09</span></a>
                   <a class="mini-rack" href="#p24" data-name="R10 · 參考來源"><span class="mled"></span><u></u><u></u><span class="rid">R10</span></a>
@@ -1360,9 +1358,9 @@ firewallCustom 考慮改 block;
                   <div class="guardcard">
                     <div class="gtitle">圍過程</div>
                     <ul>
-                      <li>flow 以 <b>SOP 等級</b>寫進 skill</li>
-                      <li>每步給<b>車票</b> <span>IP／服務代號／索引／時間窗</span></li>
-                      <li>用不到的工具<b>不掛載</b></li>
+                      <li>flow 以 <b>SOP 等級</b>寫進 skill,每步給<b>車票</b></li>
+                      <li>規則寫成<b>可數的</b> <span>只搜 1 次／最多 2 輪／結果分 6 態</span></li>
+                      <li>用不到的工具<b>不掛載</b>、非白名單<b>叫不動</b></li>
                     </ul>
                   </div>
                   <div class="guardcard">
@@ -1370,7 +1368,7 @@ firewallCustom 考慮改 block;
                     <ul>
                       <li>高頻查詢<b>包成腳本、鎖參數</b></li>
                       <li>輸出<b>固定 template 化</b></li>
-                      <li><b>執行層硬擋</b> <span>不合規回答、敏感資訊</span></li>
+                      <li><b>執行層硬擋</b> <span>不合規回答、secrets、內部路徑</span></li>
                     </ul>
                   </div>
                 </div>
@@ -1383,88 +1381,6 @@ firewallCustom 考慮改 block;
           <div class="rail r"></div>
         </div>
         <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · HOT-SWAPPABLE</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ P17 R06 · 遵從性:問題與三層解法(合併) ═══ -->
-<section class="page rk" id="p17" data-rid="R06" data-nav="r06">
-  <div class="stage">
-    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
-    <div class="rack">
-      <div class="rack-frame">
-        <div class="rack-head">
-          <span class="rack-id">R06</span>
-          <div class="rack-title"><span class="eyebrow">思維四 · 遵從性工程</span><h2>規則約束不住,怎麼辦?</h2></div>
-          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 25.1°C&nbsp; FAN <span class="fan"></span></div>
-        </div>
-        <div class="rack-body">
-          <div class="rail"></div>
-          <div class="units">
-
-            <div class="unit slim" style="--i:0;border-color:rgba(240,113,111,.4)">
-              <div class="unit-side"><i class="led r"></i></div>
-              <div class="unit-content"><span class="body"><b style="color:var(--red)">明文寫了,照犯:</b>
-                查詢回零筆 → 答「服務正常」 · 同一件事換關鍵字連查 23 輪 · 放著正確工具去找幽靈工具 · skill 明定的輸出整段漏掉
-                <span class="basis" style="margin-top:.25rem">同樣的指引在前沿模型有效 → 不是 prompt 寫不好,是遵從性有天花板</span></span></div>
-              <div class="unit-hd"><i></i></div>
-            </div>
-
-            <div class="unit" style="--i:1">
-              <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
-              <div class="unit-content">
-                <div class="unit-label">解法一 · 還是靠模型讀,但改寫成它守得住的</div>
-                <div class="unit-row u3">
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .9rem;background:#0d141f">
-                    <div style="font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--green)">1 次</div>
-                    <div style="font-size:.85rem;color:var(--muted)">工具找不到?精確名稱只搜一次,沒有就回報</div>
-                  </div>
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .9rem;background:#0d141f">
-                    <div style="font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--green)">2 輪</div>
-                    <div style="font-size:.85rem;color:var(--muted)">連兩輪沒新證據就停,輸出目前最佳答案</div>
-                  </div>
-                  <div style="border:1px solid var(--line);border-radius:.4rem;padding:.7rem .9rem;background:#0d141f">
-                    <div style="font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--green)">6 態</div>
-                    <div style="font-size:.85rem;color:var(--muted)">工具結果先分六態;零筆 ≠ 正常,只能說此條件查無</div>
-                  </div>
-                </div>
-                <p class="note" style="margin-top:.45rem">把「合理」「適度重試」換成具體數字與枚舉 —— <b style="color:var(--text)">模型不需要判斷力,只需要會數數</b></p>
-              </div>
-              <div class="unit-hd"><i></i><i></i></div>
-            </div>
-
-            <div class="unit-row u2">
-              <div class="unit" style="--i:2">
-                <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
-                <div class="unit-content">
-                  <div class="unit-label">解法二 · 不靠模型讀規則</div>
-                  <ul class="guard-list lever">
-                    <li><b>修資料,不修 prompt</b> <span>—— 路徑寫對,行為自動正確</span></li>
-                    <li><b>查詢寫成腳本、鎖參數</b> <span>—— 省 context,可獨立重跑</span></li>
-                  </ul>
-                </div>
-                <div class="unit-hd"><i></i></div>
-              </div>
-              <div class="unit" style="--i:3;border-color:rgba(61,220,151,.4)">
-                <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
-                <div class="unit-content">
-                  <div class="unit-label">解法三 · 模型沒機會犯:runtime 守門</div>
-                  <ul class="guard-list" style="margin:0">
-                    <li style="padding-left:1.5rem;position:relative"><span style="position:absolute;left:.1rem;color:var(--red);font-family:var(--mono);font-weight:700">✕</span><b>不該進來的</b> <span>非白名單的人和 bot 叫不動;危險工具不掛載;讀內部資產的指令執行層直接擋</span></li>
-                    <li style="padding-left:1.5rem;position:relative"><span style="position:absolute;left:.1rem;color:var(--green);font-family:var(--mono);font-weight:700">⏎</span><b>不該出去的</b> <span>secrets/prompt 原文整則攔下;內部路徑自動塗銷;發訊息目的地寫死在工具裡</span></li>
-                  </ul>
-                </div>
-                <div class="unit-hd"><i></i><i></i></div>
-              </div>
-            </div>
-
-            <div class="sticker"><span class="bar"></span><p>Prompt 引導選擇;skill 定義流程;<b>runtime 保證不越界 —— 越往下,越不靠模型自律</b><small>實戰:半夜的 AWS 安全通知,AI 依規則查證後判定「純資訊、無受影響資源 → 不通知」,1 分 38 秒;過濾比轉發難</small></p></div>
-
-          </div>
-          <div class="rail r"></div>
-        </div>
-        <div class="rack-foot"><span class="socket"></span><span class="socket"></span><span class="socket"></span> PDU-B · COMPLIANCE + GUARDRAIL</div>
       </div>
     </div>
   </div>
