@@ -572,6 +572,16 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
   .units{overflow:visible;justify-content:flex-start}
   .screen pre{font-size:.7rem}
   .env,.patch,.u-lab,.dt-links{display:none}
+  .agenda-item p{font-size:.72rem;line-height:1.45}
+  .agenda-item h4{font-size:.9rem}
+  .agenda-item .no{width:1.4rem;height:1.4rem;font-size:.78rem}
+  .minimap{gap:.35rem}
+  .mini-rack{width:2.3rem;height:3.6rem}
+  /* 直式:內容自然展開,不夾在固定高度裡 */
+  .rack,.rack-frame,.rack-body{min-height:0;height:auto}
+  .units{height:auto;overflow:visible}
+  .unit,.console,.unit-content{overflow:visible}
+  .unit-row{gap:.5rem}
   .screen-bar{flex-wrap:wrap;row-gap:.1rem}
   .screen-bar .time{white-space:normal;text-align:right}
   .dt-grid{grid-template-columns:1fr}
@@ -588,9 +598,11 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
     <div class="nav-links" id="navlinks">
       <a href="#p03" data-key="r01"><b>R01</b>痛點</a>
       <a href="#p04" data-key="r02"><b>R02</b>架構</a>
-      <a href="#p05" data-key="r03"><b>R03</b>思維一</a>
-      <a href="#p11" data-key="r04"><b>R04</b>思維二</a>
-      <a href="#p16" data-key="r05"><b>R05</b>思維三</a>
+      <a href="#p05" data-key="r03"><b>R03</b>查詢設計</a>
+      <a href="#p08" data-key="r04"><b>R04</b>壞碟</a>
+      <a href="#p13" data-key="r05"><b>R05</b>DDoS</a>
+      <a href="#p11" data-key="r06"><b>R06</b>分工</a>
+      <a href="#p16" data-key="r07"><b>R07</b>圍法</a>
       <a href="#p22" data-key="r08"><b>R08</b>業界</a>
       <a href="#p23" data-key="r09"><b>R09</b>時間帳</a>
       <a href="#p24" data-key="r10"><b>R10</b>參考</a>
@@ -624,7 +636,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">NOC</span>
-          <div class="rack-title"><span class="eyebrow">ABOUT / AGENDA</span><h2>今天分享四個思維</h2></div>
+          <div class="rack-title"><span class="eyebrow">ABOUT / AGENDA</span><h2>今天怎麼走</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 23.0°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -643,10 +655,11 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
               <div class="unit" style="--i:1">
                 <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
                 <div class="unit-content" style="display:flex;flex-direction:column;gap:.7rem;justify-content:center">
-                  <div class="agenda-item"><span class="no">1</span><div><h4>Skill 的形狀,來自人怎麼問問題</h4><p>查詢 flow 的設計</p></div></div>
-                  <div class="agenda-item"><span class="no">2</span><div><h4>固定查詢留給 bot,判斷才給 AI</h4><p>告警 triage 分工</p></div></div>
-                  <div class="agenda-item"><span class="no">3</span><div><h4>換模型:弱點清單=工程需求清單</h4><p>能力輪廓會變;系統對了,模型可換</p></div></div>
-                  <div class="agenda-item"><span class="no">4</span><div><h4>規則要寫成「數數題」,不是「判斷題」</h4><p>遵從性工程</p></div></div>
+                  <div class="agenda-item"><span class="no">1</span><div><h4>查詢怎麼設計</h4><p>skill 的形狀來自人怎麼問;每步交棒帶「車票」;每種問題只准查一個地方</p></div></div>
+                  <div class="agenda-item"><span class="no">2</span><div><h4>兩個真實案例</h4><p>一顆壞碟從告警到換碟驗證;一次 DDoS 的三層查證 —— 全部原文照登</p></div></div>
+                  <div class="agenda-item"><span class="no">3</span><div><h4>回頭收束設計</h4><p>哪些步驟該給 AI、哪些給 bot;該給 AI 的那段,整條路徑怎麼圍住</p></div></div>
+                  <div class="agenda-item"><span class="no">4</span><div><h4>想自己蓋一隻</h4><p>業界收斂的五個想法,加一張實測時間帳</p></div></div>
+                </div>
                 </div>
                 <div class="unit-hd"><i></i><i></i></div>
               </div>
@@ -658,9 +671,11 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
                 <div class="minimap">
                   <a class="mini-rack" href="#p03" data-name="R01 · 痛點"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R01</span></a>
                   <a class="mini-rack" href="#p04" data-name="R02 · 架構"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R02</span></a>
-                  <a class="mini-rack" href="#p05" data-name="R03 · 思維一 + 壞碟實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R03</span></a>
-                  <a class="mini-rack" href="#p11" data-name="R04 · 思維二 + DDoS 實戰"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R04</span></a>
-                  <a class="mini-rack" href="#p16" data-name="R05 · 思維三"><span class="mled"></span><u></u><u></u><span class="rid">R05</span></a>
+                  <a class="mini-rack" href="#p05" data-name="R03 · 查詢設計"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R03</span></a>
+                  <a class="mini-rack" href="#p08" data-name="R04 · 實戰:一顆壞碟"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R04</span></a>
+                  <a class="mini-rack" href="#p13" data-name="R05 · 實戰:DDoS 三層"><span class="mled"></span><u></u><u></u><u></u><u></u><span class="rid">R05</span></a>
+                  <a class="mini-rack" href="#p11" data-name="R06 · 設計收束:分工"><span class="mled"></span><u></u><u></u><span class="rid">R06</span></a>
+                  <a class="mini-rack" href="#p16" data-name="R07 · 設計收束:圍法"><span class="mled"></span><u></u><u></u><span class="rid">R07</span></a>
                   <a class="mini-rack" href="#p22" data-name="R08 · 業界五想法"><span class="mled"></span><u></u><u></u><u></u><span class="rid">R08</span></a>
                   <a class="mini-rack" href="#p23" data-name="R09 · 時間帳"><span class="mled"></span><u></u><u></u><span class="rid">R09</span></a>
                   <a class="mini-rack" href="#p24" data-name="R10 · 參考來源"><span class="mled"></span><u></u><u></u><span class="rid">R10</span></a>
@@ -756,7 +771,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
   </div>
 </section>
 
-<!-- ═══ P05 R03 思維一 · 問法 ═══ -->
+<!-- ═══ P05 R03 查詢設計 · 問法 ═══ -->
 <section class="page rk lg" id="p05" data-rid="R03" data-nav="r03">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
@@ -764,7 +779,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · 查詢 FLOW 的設計 · 1/6</span><h2>Skill 的形狀,來自人怎麼問問題</h2></div>
+          <div class="rack-title"><span class="eyebrow">查詢設計 · 1/3</span><h2>Skill 的形狀,來自人怎麼問問題</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.0°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -809,7 +824,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · 2/6</span><h2>單項查詢 → 排障 flow</h2></div>
+          <div class="rack-title"><span class="eyebrow">查詢設計 · 2/3</span><h2>單項查詢 → 排障 flow</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.0°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -852,7 +867,7 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · 3/6</span><h2>每種問題,只准查一個地方</h2></div>
+          <div class="rack-title"><span class="eyebrow">查詢設計 · 3/3</span><h2>每種問題,只准查一個地方</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.0°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -884,14 +899,14 @@ html.flat .screen::after{background:radial-gradient(120% 120% at 50% 50%, transp
 </section>
 
 <!-- ═══ P08 R03 · CASE01 1/2 ═══ -->
-<section class="page rk" id="p08" data-rid="R03" data-nav="r03">
+<section class="page rk" id="p08" data-rid="R04" data-nav="r04">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · 實戰 · 4/6</span><h2>實戰:一顆壞碟(1/2)—— 告警與首次判斷</h2></div>
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">實戰 CASE 01 · 一顆壞碟 · 1/3</span><h2>實戰:一顆壞碟(1/2)—— 告警與首次判斷</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -948,14 +963,14 @@ postswap 驗證。</pre>
 </section>
 
 <!-- ═══ P09 R03 · CASE01 2/2 ═══ -->
-<section class="page rk" id="p09" data-rid="R03" data-nav="r03">
+<section class="page rk" id="p09" data-rid="R04" data-nav="r04">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · 實戰 · 5/6</span><h2>實戰:一顆壞碟(2/2)——「換好了」之後</h2></div>
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">實戰 CASE 01 · 一顆壞碟 · 2/3</span><h2>實戰:一顆壞碟(2/2)——「換好了」之後</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1000,14 +1015,14 @@ postswap 驗證。</pre>
 </section>
 
 <!-- ═══ P10 R03 · skill 追查 ═══ -->
-<section class="page rk lg" id="p10" data-rid="R03" data-nav="r03">
+<section class="page rk lg" id="p10" data-rid="R04" data-nav="r04">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R03</span>
-          <div class="rack-title"><span class="eyebrow">思維一 · SKILL 串連 · 6/6</span><h2>壞碟之後,skill 還往下追:影響到誰?</h2></div>
+          <span class="rack-id">R04</span>
+          <div class="rack-title"><span class="eyebrow">實戰 CASE 01 · skill 串連 · 3/3</span><h2>壞碟之後,skill 還往下追:影響到誰?</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.2°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1031,123 +1046,14 @@ postswap 驗證。</pre>
 </section>
 
 <!-- ═══ P11 R04 · 決策樹 ═══ -->
-<section class="page rk lg" id="p11" data-rid="R04" data-nav="r04">
+<section class="page rk" id="p13" data-rid="R05" data-nav="r05">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R04</span>
-          <div class="rack-title"><span class="eyebrow">思維二 · 告警 TRIAGE 分工 · 1/5</span><h2>分工決策樹:這件事,需要 AI 嗎?</h2></div>
-          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.6°C&nbsp; FAN <span class="fan"></span></div>
-        </div>
-        <div class="rack-body">
-          <div class="rail"></div>
-          <div class="units">
-            <div class="unit" style="--i:0">
-              <div class="unit-side"><i class="led c"></i><i class="led g"></i><div class="vent"></div></div>
-              <div class="unit-content">
-                <div class="unit-label" style="text-align:center">DECISION TREE</div>
-                <div class="dt-root">這個任務,需要語意判斷嗎?</div>
-                <div class="dt-links"><i></i><i></i><i></i><i></i></div>
-                <div class="dt-grid">
-                  <div class="dt-col c1">
-                    <div class="cond">不需要判斷</div>
-                    <div class="who">bot / 腳本</div>
-                    <div class="how">毫秒級 · 0 token</div>
-                  </div>
-                  <div class="dt-col c2">
-                    <div class="cond">需要判斷 · 唯讀</div>
-                    <div class="who">AI + skill</div>
-                    <div class="how">分鐘級 · 跨來源綜合</div>
-                  </div>
-                  <div class="dt-col c3">
-                    <div class="cond">要寫入 · 可規則化</div>
-                    <div class="who">controller / 流程</div>
-                    <div class="how">受控白名單+確認</div>
-                  </div>
-                  <div class="dt-col c4">
-                    <div class="cond">要寫入 · 高風險</div>
-                    <div class="who">人核准</div>
-                    <div class="how">目標與業務取捨</div>
-                  </div>
-                </div>
-              </div>
-              <div class="unit-hd"><i></i><i></i></div>
-            </div>
-            <div class="unit slim" style="--i:1"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body"><b>需要判斷的,再分思考深度</b> —— runtime 對每則訊息先做語意分級 none / low / medium / high:簡單題快答,深度只花在難題;信心不足只向上提級,分類失敗回預設 —— <b>回覆速度也是分工出來的</b></span></div><div class="unit-hd"><i></i></div></div>
-            <div class="sticker"><span class="bar"></span><p>不是取代,是分工 —— <b>AI 處理不確定性;確定性的工作,編譯成程式</b><small>樹以「步驟」為單位,同一個 skill 通常混合;看懂的判斷點就腳本化 —— 朝 0 token 持續遷移</small></p></div>
-          </div>
-          <div class="rail r"></div>
-        </div>
-        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · WORKLOAD SPLIT</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ P12 R04 · triage + 統計 ═══ -->
-<section class="page rk lg" id="p12" data-rid="R04" data-nav="r04">
-  <div class="stage">
-    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
-    <div class="rack">
-      <div class="rack-frame">
-        <div class="rack-head">
-          <span class="rack-id">R04</span>
-          <div class="rack-title"><span class="eyebrow">思維二 · 2/5</span><h2>典型場景:告警 triage</h2></div>
-          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.6°C&nbsp; FAN <span class="fan"></span></div>
-        </div>
-        <div class="rack-body">
-          <div class="rail"></div>
-          <div class="units">
-            <div class="unit" style="--i:0">
-              <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
-              <div class="unit-content">
-                <div class="readout-row">
-                  <div class="readout"><div class="lab">上線後兩個月(6–7 月)</div><div class="val txt">實測工作量</div></div>
-                  <div class="readout"><div class="lab">告警判斷轉發</div><div class="val" data-count="116">116<small> 次</small></div></div>
-                  <div class="readout"><div class="lab">真人問答</div><div class="val" data-count="177">177<small> 次</small></div></div>
-                </div>
-                <p class="note" style="text-align:center;margin-top:.4rem">口徑:2026 年 6–7 月;已合併重覆發送、排除測試訊息。次數為使用量,非節省工時。</p>
-              </div>
-              <div class="unit-hd"><i></i><i></i></div>
-            </div>
-            <div class="unit" style="--i:1">
-              <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
-              <div class="unit-content">
-                <div class="unit-label">TRIAGE PIPELINE</div>
-                <div class="chain">
-                  <div class="stp">監控告警</div><div class="arr"></div>
-                  <div class="stp">bot 搬運</div><div class="arr"></div>
-                  <div class="stp" style="border-color:rgba(76,194,245,.45)">AI 查證</div><div class="arr"></div>
-                  <div class="stp">初判 + 摘要</div><div class="arr"></div>
-                  <div class="stp">通知人</div>
-                </div>
-              </div>
-              <div class="unit-hd"><i></i><i></i></div>
-            </div>
-            <div class="unit-row u2">
-              <div class="unit" style="--i:2"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><h4 style="color:var(--cyan)">查證後才通知</h4><p>AI 必須先查權威來源核實,不是轉發告警原文</p></div><div class="unit-hd"><i></i></div></div>
-              <div class="unit" style="--i:3"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><h4 style="color:var(--cyan)">送達回執才算送達</h4><p>通知有回執;狀態不明就要求人工確認,不重試</p></div><div class="unit-hd"><i></i></div></div>
-            </div>
-          </div>
-          <div class="rail r"></div>
-        </div>
-        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · TRIAGE ACTIVE</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ P13 R04 · DDoS 1/3 ═══ -->
-<section class="page rk" id="p13" data-rid="R04" data-nav="r04">
-  <div class="stage">
-    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
-    <div class="rack">
-      <div class="rack-frame">
-        <div class="rack-head">
-          <span class="rack-id">R04</span>
-          <div class="rack-title"><span class="eyebrow">思維二 · 實戰 · 3/5</span><h2>實戰:DDoS 三層查證(1/3)—— 提問與 CF edge</h2></div>
+          <span class="rack-id">R05</span>
+          <div class="rack-title"><span class="eyebrow">實戰 CASE 02 · DDoS · 1/3</span><h2>實戰:DDoS 三層查證(1/3)—— 提問與 CF edge</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.8°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1203,20 +1109,20 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P14 R04 · DDoS 2/3 ═══ -->
-<section class="page rk" id="p14" data-rid="R04" data-nav="r04">
+<section class="page rk" id="p14" data-rid="R05" data-nav="r05">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R04</span>
-          <div class="rack-title"><span class="eyebrow">思維二 · 實戰 · 4/5</span><h2>實戰:DDoS 三層查證(2/3)—— 每一步怎麼知道下一步</h2></div>
+          <span class="rack-id">R05</span>
+          <div class="rack-title"><span class="eyebrow">實戰 CASE 02 · DDoS · 2/3</span><h2>實戰:DDoS 三層查證(2/3)—— 每一步怎麼知道下一步</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.8°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="plate" style="--i:0">▍同一次查證的推導鏈(每步標「依據」;這就是思維一的車票在跑)</div>
+            <div class="plate" style="--i:0">▍同一次查證的推導鏈(每步標「依據」;這就是前面講的車票在跑)</div>
             <div class="unit slim" style="--i:1"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">①</span><span class="body">告警 → 解出 zone / host / 時間窗 15:41–16:41<span class="basis">告警內的 dashboard URL</span></span></div><div class="unit-hd"><i></i></div></div>
             <div class="unit slim" style="--i:2"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">②</span><span class="body">host 前綴 b897 → 客戶定位 ZT•••<span class="basis">skill 的 random_id 對照規則</span></span></div><div class="unit-hd"><i></i></div></div>
             <div class="unit slim" style="--i:3"><div class="unit-side"><i class="led g"></i></div><div class="unit-content"><span class="no">③</span><span class="body">客戶 → origin 走哪組 HA → log 索引 ha-•••-07.07<span class="basis">客戶 → 架構路由表</span></span></div><div class="unit-hd"><i></i></div></div>
@@ -1248,14 +1154,14 @@ CF 總計 2,602,932 事件 vs origin 僅 624,565
 </section>
 
 <!-- ═══ P15 R04 · DDoS 3/3 ═══ -->
-<section class="page rk" id="p15" data-rid="R04" data-nav="r04">
+<section class="page rk" id="p15" data-rid="R05" data-nav="r05">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R04</span>
-          <div class="rack-title"><span class="eyebrow">思維二 · 實戰 · 5/5</span><h2>實戰:DDoS 三層查證(3/3)—— ES 接力到 backend</h2></div>
+          <span class="rack-id">R05</span>
+          <div class="rack-title"><span class="eyebrow">實戰 CASE 02 · DDoS · 3/3</span><h2>實戰:DDoS 三層查證(3/3)—— ES 接力到 backend</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.8°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1305,15 +1211,124 @@ firewallCustom 考慮改 block;
   </div>
 </section>
 
-<!-- ═══ P16 R05 思維三 ═══ -->
-<section class="page rk lg" id="p16" data-rid="R05" data-nav="r05">
+<!-- ═══ P16 R07 設計收束 · 圍法 ═══ -->
+<section class="page rk lg" id="p11" data-rid="R06" data-nav="r06">
   <div class="stage">
     <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
     <div class="rack">
       <div class="rack-frame">
         <div class="rack-head">
-          <span class="rack-id">R05</span>
-          <div class="rack-title"><span class="eyebrow">思維三 · 能力輪廓會變;系統對了,模型可換</span><h2>換模型:弱點清單,就是工程需求清單</h2></div>
+          <span class="rack-id">R06</span>
+          <div class="rack-title"><span class="eyebrow">設計收束 · 分工 · 1/3</span><h2>分工決策樹:這件事,需要 AI 嗎?</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.6°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led c"></i><i class="led g"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label" style="text-align:center">DECISION TREE</div>
+                <div class="dt-root">這個任務,需要語意判斷嗎?</div>
+                <div class="dt-links"><i></i><i></i><i></i><i></i></div>
+                <div class="dt-grid">
+                  <div class="dt-col c1">
+                    <div class="cond">不需要判斷</div>
+                    <div class="who">bot / 腳本</div>
+                    <div class="how">毫秒級 · 0 token</div>
+                  </div>
+                  <div class="dt-col c2">
+                    <div class="cond">需要判斷 · 唯讀</div>
+                    <div class="who">AI + skill</div>
+                    <div class="how">分鐘級 · 跨來源綜合</div>
+                  </div>
+                  <div class="dt-col c3">
+                    <div class="cond">要寫入 · 可規則化</div>
+                    <div class="who">controller / 流程</div>
+                    <div class="how">受控白名單+確認</div>
+                  </div>
+                  <div class="dt-col c4">
+                    <div class="cond">要寫入 · 高風險</div>
+                    <div class="who">人核准</div>
+                    <div class="how">目標與業務取捨</div>
+                  </div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit slim" style="--i:1"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body"><b>需要判斷的,再分思考深度</b> —— runtime 對每則訊息先做語意分級 none / low / medium / high:簡單題快答,深度只花在難題;信心不足只向上提級,分類失敗回預設 —— <b>回覆速度也是分工出來的</b></span></div><div class="unit-hd"><i></i></div></div>
+            <div class="sticker"><span class="bar"></span><p>不是取代,是分工 —— <b>AI 處理不確定性;確定性的工作,編譯成程式</b><small>樹以「步驟」為單位,同一個 skill 通常混合;看懂的判斷點就腳本化 —— 朝 0 token 持續遷移</small></p></div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · WORKLOAD SPLIT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P12 R04 · triage + 統計 ═══ -->
+<section class="page rk lg" id="p12" data-rid="R06" data-nav="r06">
+  <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R06</span>
+          <div class="rack-title"><span class="eyebrow">設計收束 · 分工 · 2/3</span><h2>典型場景:告警 triage</h2></div>
+          <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 24.6°C&nbsp; FAN <span class="fan"></span></div>
+        </div>
+        <div class="rack-body">
+          <div class="rail"></div>
+          <div class="units">
+            <div class="unit" style="--i:0">
+              <div class="unit-side"><i class="led g"></i><i class="led g"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="readout-row">
+                  <div class="readout"><div class="lab">上線後兩個月(6–7 月)</div><div class="val txt">實測工作量</div></div>
+                  <div class="readout"><div class="lab">告警判斷轉發</div><div class="val" data-count="116">116<small> 次</small></div></div>
+                  <div class="readout"><div class="lab">真人問答</div><div class="val" data-count="177">177<small> 次</small></div></div>
+                </div>
+                <p class="note" style="text-align:center;margin-top:.4rem">口徑:2026 年 6–7 月;已合併重覆發送、排除測試訊息。次數為使用量,非節省工時。</p>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit" style="--i:1">
+              <div class="unit-side"><i class="led c"></i><div class="vent"></div></div>
+              <div class="unit-content">
+                <div class="unit-label">TRIAGE PIPELINE</div>
+                <div class="chain">
+                  <div class="stp">監控告警</div><div class="arr"></div>
+                  <div class="stp">bot 搬運</div><div class="arr"></div>
+                  <div class="stp" style="border-color:rgba(76,194,245,.45)">AI 查證</div><div class="arr"></div>
+                  <div class="stp">初判 + 摘要</div><div class="arr"></div>
+                  <div class="stp">通知人</div>
+                </div>
+              </div>
+              <div class="unit-hd"><i></i><i></i></div>
+            </div>
+            <div class="unit-row u2">
+              <div class="unit" style="--i:2"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><h4 style="color:var(--cyan)">查證後才通知</h4><p>AI 必須先查權威來源核實,不是轉發告警原文</p></div><div class="unit-hd"><i></i></div></div>
+              <div class="unit" style="--i:3"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><h4 style="color:var(--cyan)">送達回執才算送達</h4><p>通知有回執;狀態不明就要求人工確認,不重試</p></div><div class="unit-hd"><i></i></div></div>
+            </div>
+          </div>
+          <div class="rail r"></div>
+        </div>
+        <div class="rack-foot"><span class="socket"></span><span class="socket"></span> PDU-B · TRIAGE ACTIVE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ P13 R04 · DDoS 1/3 ═══ -->
+<section class="page rk lg" id="p16" data-rid="R07" data-nav="r07">
+  <div class="stage">
+    <div class="env" aria-hidden="true"><i class="nb l"></i><i class="nb r"></i><i class="lamp"></i></div>
+    <div class="rack">
+      <div class="rack-frame">
+        <div class="rack-head">
+          <span class="rack-id">R07</span>
+          <div class="rack-title"><span class="eyebrow">設計收束 · 圍法 · 3/3</span><h2>換模型:弱點清單,就是工程需求清單</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 22.8°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
