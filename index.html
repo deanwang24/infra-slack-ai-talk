@@ -1246,21 +1246,20 @@ firewallCustom 考慮改 block;
         <div class="rack-body">
           <div class="rail"></div>
           <div class="units">
-            <div class="unit slim" style="--i:0"><div class="unit-side"><i class="led c"></i></div><div class="unit-content"><span class="body"><b>為什麼換地端?</b>查詢內容不出門(告警原文/內部 IP/客戶 log 留在機房);慢可以自己修(量化+投機解碼 8→23.3 tok/s)—— <b>代價是下面四樣,每樣都有工程圍法</b></span></div><div class="unit-hd"><i></i></div></div>
-            <div class="unit" style="--i:1">
+            <div class="unit" style="--i:0">
               <div class="unit-side"><i class="led a"></i><i class="led g"></i><div class="vent"></div></div>
               <div class="unit-content">
                 <h4 style="color:var(--amber);margin-bottom:.4rem">換不回的 → 圍法</h4>
                 <ul class="guard-list lever">
-                  <li><b>思考深度</b> <span>→ 靠 skill 顯式化 flow(思維一)</span></li>
-                  <li><b>指令遵從性</b> <span>→ 規則寫成可數的(只搜 1 次/最多 2 輪)+ 執行層硬擋(思維四)</span></li>
-                  <li><b>生態</b> <span>→ bot/腳本自建(思維二)</span></li>
-                  <li><b>語意廣度</b> <span>→ 黑話對照表(車票第 0 步)</span></li>
+                  <li><b>思考深度</b> <span>→ skill 把 flow 寫死(前面講的查詢 flow)</span></li>
+                  <li><b>指令遵從性</b> <span>→ 規則寫成可數的(只搜 1 次/最多 2 輪)+ 執行層硬擋(下一段就講)</span></li>
+                  <li><b>生態</b> <span>→ bot/腳本自建(前面的 bot 分工)</span></li>
+                  <li><b>語意廣度</b> <span>→ 黑話對照表(QK 那件事)</span></li>
                 </ul>
               </div>
               <div class="unit-hd"><i></i><i></i></div>
             </div>
-            <div class="sticker"><span class="bar"></span><p>「換不回的」清單 = 其他三個思維的需求說明書 —— <b>系統做對了,模型是可換零件</b><small>※ 相對前沿 API 而言;本地模型間 27B 整體優於先前 35B MoE —— 能力輪廓不同,非參數量排大小</small></p></div>
+            <div class="sticker"><span class="bar"></span><p>這四條的圍法,全是今天前後在講的東西 —— <b>系統做對了,模型是可換零件</b></p></div>
           </div>
           <div class="rail r"></div>
         </div>
