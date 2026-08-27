@@ -1351,7 +1351,7 @@ firewallCustom 考慮改 block;
       <div class="rack-frame">
         <div class="rack-head">
           <span class="rack-id">R06</span>
-          <div class="rack-title"><span class="eyebrow">思維四 · 實戰 · 3/3</span><h2>實戰:AI 糾正了人類的記憶</h2></div>
+          <div class="rack-title"><span class="eyebrow">思維四 · 實戰 · 3/3</span><h2>實戰:AI 判斷「這則不用吵大家」</h2></div>
           <div class="rack-tele">PWR <i class="led g"></i>&nbsp; TEMP 25.1°C&nbsp; FAN <span class="fan"></span></div>
         </div>
         <div class="rack-body">
@@ -1360,37 +1360,46 @@ firewallCustom 考慮改 block;
             <div class="unit-row u2">
               <div class="console" style="--i:0">
                 <div class="screen">
-                  <div class="screen-bar"><span class="avatar av-human">同</span><span class="name">同仁</span><span class="time">實際提問 · 06-08 14:01 GMT+8</span></div>
-                  <pre>4/24 A800 SiteB remote BAY 43 → BAY 25 接手
-4/27 A800 SiteA Bay 25 亮橘燈, 預防性更換
-5/11 A800 SiteB remote BAY 32 → BAY 43 接手
-6/8 A800 SiteA remote BAY 37 → BAY 47 接手
-是這樣嗎 幫我事實核實下
-
-<span class="dim">(同仁憑印象寫的整理,貼給 AI 求證)</span></pre>
+                  <div class="screen-bar"><span class="avatar av-bot">J</span><span class="name">Jarvis</span><span class="time">① 告警轉入 · 08-12 04:32 GMT+8</span></div>
+                  <pre>[TRIAGE:aws-health]
+skill=hyjay-aws-health-notify
+account=761•••••479
+service=ELASTICACHE
+code=AWS_ELASTICACHE_SECURITY
+     _NOTIFICATION
+category=accountNotification
+region=ap-southeast-1
+start="Tue, 11 Aug 2026 10:10:00 GMT"
+src=C089•••••
+severity=📣</pre>
                 </div>
                 <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#09</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
               <div class="console" style="--i:1">
                 <div class="screen">
-                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">核實輸出 · 14:03 GMT+8(2 分 27 秒)</span></div>
-                  <pre>「我核對後,不是完全照你這 4 行寫法」
-├─ 4/24 <span class="warn">△ 部分不一致</span>:來源字面是
-│    SiteA SSD43 → SSD25,不是 SiteB
-├─ 4/27 <span class="hl">✓ 確認正確</span>(亮橘燈・預防性更換)
-├─ 5/11 <span class="err">✗ 無法確認</span> bay 32→43
-│    (Jira 只寫「一顆 disk」,無 bay 編號)
-└─ 6/8 <span class="warn">△ 監控僅支持</span>「Bay37 消失、Bay47 存在」
-     「接手」屬推論 → 需 ONTAP/EMS 確認
-――
-追問:「這是哪張單?」
-答:「這句不是來自單據,
-  是我從監控現況推出來的檢查結果」</pre>
+                  <div class="screen-bar"><span class="avatar av-ai">AI</span><span class="name">Hyjay AI</span><span class="time">② 查證後判定 · 04:34(1 分 38 秒)</span></div>
+                  <pre>查證完成。這是 <span class="warn">ELASTICACHE 純資訊通知</span>,
+不影響實際資源運作。
+判定:<span class="hl">SKIP —— 不通知 #hyjay-••</span>
+原因:此為 AWS 政策變更公告(2026 年
+6 月起 Chrome Root Program 要求 TLS
+證書提交至公開 CT log),提醒 cluster
+name 會隨證書曝光。屬純資訊性質
+(accountNotification),<span class="hl">resources 欄位
+為空,無特定受影響資源</span>,也無要求
+遷移、排程或相容性確認的具體動作。
+符合 importance policy Priority 4:
+純資訊、無受影響資源 → SKIP。
+查證摘要:
+- 來源管道 #aws-•••,<span class="hl">3 天窗內查證到
+  1 筆匹配</span>
+- content_hash: c0f7•••••
+此 case 判定為 SKIP,未送達 #hyjay-••。</pre>
                 </div>
                 <div class="console-ctrl"><span class="brand">HYJAY LCD CONSOLE</span><span class="chip">CH#10</span><span class="btns"><i></i><i></i><i></i></span><span class="pwr"></span></div>
               </div>
             </div>
-            <div class="sticker cy"><span class="bar"></span><p>真實對話:<b>逐條標證據等級(✓/△/✗)、標明推論來源</b> —— 上一頁的零筆原則,實戰長這樣</p></div>
+            <div class="sticker cy"><span class="bar"></span><p>訊息原文照登 —— <b>過濾比轉發難:讀懂公告內容、比對有無受影響資源,才敢說「這則不用通知」</b></p></div>
           </div>
           <div class="rail r"></div>
         </div>
